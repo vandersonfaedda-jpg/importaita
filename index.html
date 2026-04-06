@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>importaITA — Cina → Italia</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--brand:#009246;--brand2:#006830;--acc:#CE2B37;--bg:#f4f5f7;--surf:#fff;--surf2:#f9fafb;--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.15);--t1:#111827;--t2:#6b7280;--t3:#9ca3af}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;line-height:1.5;color:var(--t1);background:var(--bg)}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{background:var(--surf);border-radius:14px;padding:40px 44px;width:380px;border:0.5px solid var(--bd);box-shadow:0 4px 32px rgba(0,0,0,0.08)}
+.login-logo{font-size:22px;font-weight:700;color:var(--brand);margin-bottom:4px}.login-logo b{color:#f5894a}
+.login-sub{font-size:12px;color:var(--t3);margin-bottom:6px}
+.login-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:#166534;background:#dcfce7;padding:3px 8px;border-radius:100px;margin-bottom:24px}
+.flbl{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:4px;display:block}
+.finp{font-family:inherit;font-size:14px;color:var(--t1);background:var(--surf2);border:0.5px solid var(--bd2);border-radius:8px;padding:10px 12px;width:100%;outline:none;margin-bottom:10px}
+.finp:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(15,76,129,0.1)}
+.fbtn{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;font-weight:600;cursor:pointer;width:100%;transition:background .15s}
+.fbtn:hover{background:var(--brand2)}
+.fbtn:disabled{opacity:0.6;cursor:not-allowed}
+.ferr{font-size:11px;color:#dc2626;margin-top:8px;text-align:center;min-height:16px}
+.finfo{font-size:10px;color:#d1d5db;text-align:center;margin-top:16px;line-height:1.6}
+.flink{font-size:11px;color:var(--brand2);text-align:center;margin-top:10px;cursor:pointer;text-decoration:underline}
+
+/* APP */
+#app{display:none}
+.topbar{background:var(--brand);height:50px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:50}
+.logo{font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.3px}.logo b{color:#f5894a}
+.sep{width:1px;height:18px;background:rgba(255,255,255,0.2)}
+.tsub{font-size:11px;color:rgba(255,255,255,0.45);font-family:monospace}
+.tnav{display:flex;gap:2px;margin-left:auto;align-items:center}
+.nb{background:none;border:none;color:rgba(255,255,255,0.6);font-size:12px;font-family:inherit;padding:5px 11px;border-radius:6px;cursor:pointer}
+.nb:hover{background:rgba(255,255,255,0.1);color:#fff}
+.nb.on{background:rgba(255,255,255,0.18);color:#fff;font-weight:600}
+.user-chip{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.7);margin-left:8px;padding-left:8px;border-left:1px solid rgba(255,255,255,0.2)}
+.logout-link{color:rgba(255,255,255,0.5);font-size:11px;cursor:pointer;text-decoration:underline}
+.logout-link:hover{color:#fff}
+
+.layout{display:grid;grid-template-columns:256px 1fr;min-height:calc(100vh - 50px)}
+.side{background:var(--surf);border-right:0.5px solid var(--bd);padding:16px 14px;display:flex;flex-direction:column;gap:12px}
+.main{padding:20px;background:var(--bg)}
+.stitle{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.flbl2{font-size:11px;color:var(--t2);font-weight:500;margin-bottom:3px;display:block}
+input,select{font-family:inherit;font-size:12px;color:var(--t1);background:var(--surf2);border:0.5px solid var(--bd);border-radius:6px;padding:6px 9px;width:100%;outline:none;display:block}
+input:focus,select:focus{border-color:var(--brand2)}
+.pbtn{background:var(--brand);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-family:inherit;font-weight:600;cursor:pointer;width:100%;margin-top:4px;display:block}
+.pbtn:hover{background:var(--brand2)}
+.abtn{background:var(--acc);color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-family:inherit;font-weight:600;cursor:pointer}
+.sbtn{background:var(--surf);border:0.5px solid var(--bd2);color:var(--t1);border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer}
+.card{background:var(--surf);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px}
+.mc{background:var(--surf2);border-radius:8px;padding:12px 14px}
+.mlbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
+.mval{font-size:20px;font-weight:600;color:var(--t1);line-height:1.1}
+.msub{font-size:11px;color:var(--t3);margin-top:3px}
+.mg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.mg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mg3b{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.bdg{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 7px;border-radius:100px}
+.b-alta{background:#dcfce7;color:#166534}.b-media{background:#fef9c3;color:#854d0e}.b-baixa{background:#fee2e2;color:#991b1b}
+.b-sim{background:#f3e8ff;color:#6b21a8}.b-cn{background:#fee2e2;color:#991b1b}.b-real{background:#dbeafe;color:#1e40af}
+.al{padding:9px 12px;border-radius:6px;font-size:12px;line-height:1.6;margin-bottom:10px;border:0.5px solid transparent}
+.al-info{background:#eff6ff;border-color:#93c5fd;color:#1e40af}
+.al-warn{background:#fffbeb;border-color:#fcd34d;color:#92400e}
+.al-ok{background:#f0fdf4;border-color:#86efac;color:#166534}
+.dv{height:0.5px;background:var(--bd);margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:10px;font-weight:600;color:var(--t3);text-align:left;padding:5px 8px;border-bottom:0.5px solid var(--bd);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+td{padding:7px 8px;border-bottom:0.5px solid var(--bd);color:var(--t1);vertical-align:middle}
+tr:last-child td{border:none}
+tr:hover td{background:var(--surf2)}
+.tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--bd);margin-bottom:14px}
+.tab{background:none;border:none;font-size:12px;font-family:inherit;padding:6px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-0.5px;color:var(--t2)}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+.hi{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:6px;cursor:pointer}
+.hi:hover{background:var(--surf2)}
+.hncm{font-family:monospace;font-size:10px;color:var(--t3);min-width:72px;flex-shrink:0}
+.sugg{background:var(--surf);border:0.5px solid var(--bd2);border-radius:6px;margin-top:3px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.si{padding:7px 10px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px}
+.si:hover{background:var(--surf2)}
+.tu{color:#16a34a;font-size:11px;font-weight:600}.td2{color:#dc2626;font-size:11px;font-weight:600}
+.band{border-radius:6px;padding:9px 10px;text-align:center}
+.bmin{background:#f0fdf4;border:0.5px solid #86efac}.bavg{background:#eff6ff;border:0.5px solid #93c5fd}.bcons{background:#fff7ed;border:0.5px solid #fdba74}
+.bv{font-size:13px;font-weight:600;margin:3px 0;line-height:1.2}
+.bmin .bv{color:#166534}.bavg .bv{color:#1e40af}.bcons .bv{color:#9a3412}
+.blbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
+.sl{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--bd);font-size:12px;gap:8px}
+.sl:last-child{border:none}
+.page{display:none}.page.on{display:block}
+.ncmt{font-family:monospace;font-size:11px;background:var(--surf2);border:0.5px solid var(--bd);border-radius:6px;padding:2px 7px;color:var(--t2)}
+.cb{height:4px;border-radius:2px;background:var(--bd);overflow:hidden;margin-top:4px}
+.cf{height:100%;border-radius:2px;transition:width .4s}
+.admi{font-size:12px;color:var(--t2);padding:7px 10px;background:var(--surf2);border-radius:6px;border-left:3px solid #f59e0b;margin-bottom:5px;line-height:1.5}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ptax-bar{background:#eff6ff;border:0.5px solid #93c5fd;border-radius:6px;padding:7px 10px;font-size:11px;color:#1e40af;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sec-bar{background:#f0fdf4;border:0.5px solid #86efac;border-radius:6px;padding:6px 10px;font-size:10px;color:#166534;display:flex;align-items:center;gap:6px;margin-bottom:10px;font-weight:500}
+.loader{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--t3);font-size:12px;gap:8px}
+.big-spin{width:20px;height:20px;border:2px solid var(--bd);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite}
+</style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN — autenticação real via Supabase -->
+<div id="login-screen">
+  <div class="login-box" id="login-box">
+    <div class="login-logo">importa<b>ITA</b></div>
+    <div class="login-sub">intelligenza commerciale Cina → Italia</div>
+    <div class="login-badge">🔒 Login seguro via Supabase</div>
+
+    <div id="login-form">
+      <label class="flbl" for="login-email">E-mail</label>
+      <input class="finp" id="login-email" type="email" placeholder="seu@email.com" autocomplete="email"/>
+      <label class="flbl" for="login-pw">Senha</label>
+      <input class="finp" id="login-pw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <div class="ferr" id="login-err"></div>
+      <button class="fbtn" id="login-btn" onclick="doLogin()">Entrar</button>
+      <div class="flink" onclick="showReset()">Esqueci minha senha</div>
+    </div>
+
+    <div id="reset-form" style="display:none">
+      <label class="flbl">E-mail para recuperação</label>
+      <input class="finp" id="reset-email" type="email" placeholder="seu@email.com"/>
+      <div class="ferr" id="reset-msg"></div>
+      <button class="fbtn" onclick="doReset()">Enviar link de recuperação</button>
+      <div class="flink" onclick="showLogin()">Voltar ao login</div>
+    </div>
+
+    <div class="finfo">
+      Accesso limitato · importaITA<br>
+      Richiedere accesso
+    </div>
+  </div>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="app">
+<div class="topbar">
+  <div class="logo">importa<b>ITA</b></div>
+  <div class="sep"></div>
+  <span class="tsub">Cina → Italia · intelligenza commerciale</span>
+  <nav class="tnav">
+    <button class="nb on" onclick="pg('dashboard',this)">Dashboard</button>
+    <button class="nb" onclick="pg('resultado',this)">Risultati</button>
+    <button class="nb" onclick="pg('graficos',this)">Analisi</button>
+    <button class="nb" onclick="pg('simulador',this)">Simulatore</button>
+    <div class="user-chip">
+      <span id="user-email-display">—</span>
+      <span class="logout-link" onclick="doLogout()">sair</span>
+    </div>
+  </nav>
+</div>
+
+<div class="layout">
+<aside class="side">
+  <div>
+    <div class="stitle">Busca</div>
+    <input id="qi" placeholder="Prodotto, codice NC o parola chiave..." oninput="onInput(this.value)" autocomplete="off"/>
+    <div id="sugg" style="display:none" class="sugg"></div>
+    <button class="pbtn" onclick="doSearch()">Cerca</button>
+  </div>
+  <div class="dv" style="margin:2px 0"></div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div class="stitle">Filtros</div>
+    <div><label class="flbl2">Periodo</label><select id="fp"><option value="3">3 mesi</option><option value="6">6 mesi</option><option value="12" selected>12 mesi</option><option value="24">24 mesi</option></select></div>
+    <div><label class="flbl2">Porto di entrata</label><select id="fuf"><option value="">Todos</option><option>SP</option><option>SC</option><option>RJ</option><option>PR</option><option>RS</option></select></div>
+    <div><label class="flbl2">Modalita</label><select id="fmod"><option value="">Todos</option><option>Marittimo</option><option>Aereo</option><option>Courier</option></select></div>
+    <div><label class="flbl2">Cambio USD/EUR</label><input type="number" id="cambio" value="5.15" step="0.01" min="1" onchange="onCambio()"/></div>
+  </div>
+  <div class="dv" style="margin:2px 0"></div>
+  <div>
+    <div class="stitle">Storico</div>
+    <div style="margin-top:4px">
+      <div class="hi" onclick="sel('7323.93.00')"><span class="hncm">7323.93.00</span><span style="font-size:11px">Scolapiatti inox</span></div>
+      <div class="hi" onclick="sel('8516.50.00')"><span class="hncm">8516.50.00</span><span style="font-size:11px">Forni microonde</span></div>
+      <div class="hi" onclick="sel('6204.62.31')"><span class="hncm">6204.62.31</span><span style="font-size:11px">Pantaloni donna</span></div>
+      <div class="hi" onclick="sel('8471.30.01')"><span class="hncm">8471.30.01</span><span style="font-size:11px">Computer portatili</span></div>
+    </div>
+  </div>
+  <div style="margin-top:auto;padding-top:10px;border-top:0.5px solid var(--bd)">
+    <div style="font-size:10px;color:#d1d5db;line-height:1.6"><span style="color:var(--acc);font-weight:600;display:block;margin-bottom:2px">Dati simulati — MVP</span>Stime per dimostrazione.</div>
+  </div>
+</aside>
+
+<main class="main">
+
+<div class="page on" id="page-dashboard">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div><div style="font-size:17px;font-weight:600;margin-bottom:2px">Pannello importazioni</div><div style="font-size:11px;color:var(--t3)">Cina → Italia · ISTAT / Banca d'Italia</div></div>
+    <div style="display:flex;gap:8px;align-items:center"><span class="bdg b-sim">Dados simulados</span><button class="sbtn" onclick="expCSV()">Esporta CSV</button></div>
+  </div>
+  <div class="sec-bar">🔒 Sessione autenticata via Supabase · JWT sicuro</div>
+  <div id="ptax-bar" class="ptax-bar"><span class="spin"></span> Buscando câmbio PTAX...</div>
+  <div class="al al-info" id="dash-alert">Cerca un prodotto. Es: <strong>scolapiatti inox</strong></div>
+  <div class="mg3">
+    <div class="mc"><div class="mlbl">FOB médio / USD</div><div class="mval" id="d-fob-usd">—</div><div class="msub">por unidade</div></div>
+    <div class="mc"><div class="mlbl">FOB médio / BRL</div><div class="mval" id="d-fob-brl">—</div><div class="msub" id="d-cs">—</div></div>
+    <div class="mc"><div class="mlbl">Preço / kg</div><div class="mval" id="d-pkg">—</div><div class="msub">USD/kg</div></div>
+    <div class="mc"><div class="mlbl">Volume</div><div class="mval" id="d-vol">—</div><div class="msub">período</div></div>
+    <div class="mc"><div class="mlbl">Confiança</div><div class="mval" id="d-sc">—</div><div class="cb"><div class="cf" id="d-cf" style="width:0%"></div></div></div>
+    <div class="mc"><div class="mlbl">Custo nac. est.</div><div class="mval" id="d-nac">—</div><div class="msub">BRL/un</div></div>
+  </div>
+  <div class="card">
+    <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:10px">Prodotti in evidenza</div>
+    <div style="overflow-x:auto"><table><thead><tr><th>NCM</th><th>Produto</th><th>FOB USD</th><th>BRL/un</th><th>Tendência</th><th>Confiança</th><th></th></tr></thead><tbody id="ftable"></tbody></table></div>
+  </div>
+</div>
+
+<div class="page" id="page-resultado">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px">
+    <div style="flex:1">
+      <div style="font-size:17px;font-weight:600;margin-bottom:6px" id="r-nome">—</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="ncmt" id="r-ncm">—</span><span class="bdg b-cn">China</span><span class="bdg" id="r-sb">—</span></div>
+    </div>
+    <div style="text-align:right"><div style="font-size:10px;color:var(--t3)">Periodo</div><div style="font-size:12px;font-weight:600" id="r-per">—</div></div>
+  </div>
+  <div id="r-alerts"></div>
+  <div class="tabs">
+    <button class="tab on" onclick="rt('precos',this)">Preços</button>
+    <button class="tab" onclick="rt('ops',this)">Operações</button>
+    <button class="tab" onclick="rt('adm',this)">Tratamento adm.</button>
+  </div>
+  <div id="rp-precos">
+    <div class="mg3">
+      <div class="mc"><div class="mlbl">FOB USD</div><div class="mval" id="r-fob-u">—</div></div>
+      <div class="mc"><div class="mlbl">FOB BRL</div><div class="mval" id="r-fob-b">—</div><div class="msub" id="r-fob-bs">—</div></div>
+      <div class="mc"><div class="mlbl">CIF USD</div><div class="mval" id="r-cif">—</div></div>
+      <div class="mc"><div class="mlbl">Preço/kg</div><div class="mval" id="r-pkg">—</div></div>
+      <div class="mc"><div class="mlbl">Volume</div><div class="mval" id="r-vol">—</div></div>
+      <div class="mc"><div class="mlbl">Ticket médio</div><div class="mval" id="r-tick">—</div></div>
+    </div>
+    <div class="mg2" style="margin-top:12px">
+      <div class="card">
+        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px">Faixa de preço estimada</div>
+        <div class="mg3b">
+          <div class="band bmin"><div class="blbl">Mínima</div><div class="bv" id="b-min">—</div><div style="font-size:9px;color:#16a34a">R$/un</div></div>
+          <div class="band bavg"><div class="blbl">Média</div><div class="bv" id="b-avg">—</div><div style="font-size:9px;color:#1e40af">R$/un</div></div>
+          <div class="band bcons"><div class="blbl">Conservadora</div><div class="bv" id="b-cons">—</div><div style="font-size:9px;color:#9a3412">R$/un</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px">Score de confiança</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="position:relative;width:52px;height:52px;flex-shrink:0">
+            <svg viewBox="0 0 52 52" width="52" height="52" style="transform:rotate(-90deg)">
+              <circle cx="26" cy="26" r="20" fill="none" stroke="#e5e7eb" stroke-width="5"/>
+              <circle cx="26" cy="26" r="20" fill="none" stroke="#16a34a" stroke-width="5" stroke-dasharray="125.6" stroke-dashoffset="125.6" id="sring" stroke-linecap="round" style="transition:stroke-dashoffset .5s ease"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600" id="snum">—</div>
+          </div>
+          <div id="sfacts" style="display:flex;flex-direction:column;gap:4px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="rp-ops" style="display:none"><div class="card"><div style="overflow-x:auto"><table><thead><tr><th>Mês</th><th>FOB USD</th><th>CIF USD</th><th>Qtd</th><th>Peso kg</th><th>UF</th><th>Modalita</th><th>Var.</th></tr></thead><tbody id="otable"></tbody></table></div></div></div>
+  <div id="rp-adm" style="display:none"><div class="card" id="adm-card"></div></div>
+</div>
+
+<div class="page" id="page-graficos">
+  <div style="font-size:17px;font-weight:600;margin-bottom:2px">Análise histórica</div>
+  <div style="font-size:11px;color:var(--t3);margin-bottom:14px" id="g-sub">Selecione um produto para ver os gráficos</div>
+  <div class="mg2" style="margin-bottom:12px">
+    <div class="card"><div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Evolução mensal FOB (USD)</div><div style="position:relative;height:180px"><canvas id="ch-fob"></canvas></div></div>
+    <div class="card"><div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">FOB BRL vs Custo nacionalizado</div><div style="position:relative;height:180px"><canvas id="ch-cmp"></canvas></div></div>
+  </div>
+  <div class="mg2">
+    <div class="card"><div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Distribuição por modal</div><div style="display:flex;align-items:center;gap:16px"><div style="position:relative;height:150px;width:150px;flex-shrink:0"><canvas id="ch-mod"></canvas></div><div id="ch-mod-leg" style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--t2)"></div></div></div>
+    <div class="card"><div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Top UFs de entrada</div><div style="position:relative;height:150px"><canvas id="ch-uf"></canvas></div></div>
+  </div>
+</div>
+
+<div class="page" id="page-simulador">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div><div style="font-size:17px;font-weight:600;margin-bottom:2px">Simulador de custo nacionalizado</div><div style="font-size:11px;color:var(--t3)">Calcule o custo real com todos os tributos</div></div>
+    <button class="abtn" onclick="calcSim()">Calcular</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 350px;gap:14px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card">
+        <div class="stitle" style="margin-bottom:8px">Prodotto e operazione</div>
+        <div class="mg2">
+          <div><label class="flbl2">Produto</label><input id="s-prod" value="Scolapiatti in acciaio inox"/></div>
+          <div><label class="flbl2">NCM</label><input id="s-ncm" value="7323.93.00" style="font-family:monospace;font-size:11px"/></div>
+          <div><label class="flbl2">Quantidade (un)</label><input id="s-qtd" type="number" value="1000" min="1"/></div>
+          <div><label class="flbl2">Unit. FOB (USD)</label><input id="s-fob" type="number" value="2.85" step="0.01"/></div>
+          <div><label class="flbl2">Frete total (USD)</label><input id="s-frt" type="number" value="950" step="10"/></div>
+          <div><label class="flbl2">Seguro (USD)</label><input id="s-seg" type="number" value="45"/></div>
+          <div><label class="flbl2">Câmbio</label><input id="s-cam" type="number" value="0.92" step="0.01"/></div>
+          <div><label class="flbl2">AFRMM (%)</label><input id="s-afr" type="number" value="8" step="0.5"/></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:8px">Aliquote doganali</div>
+        <div class="mg2">
+          <div><label class="flbl2">II (%)</label><input id="s-ii" type="number" value="0" step="0.5"/></div>
+          <div><label class="flbl2">IVA import (%)</label><input id="s-ipi" type="number" value="22" step="0.5"/></div>
+          <div><label class="flbl2">Diritti doganali (%)</label><input id="s-pis" type="number" value="0.8" step="0.1"/></div>
+          <div><label class="flbl2">Spese bancarie (%)</label><input id="s-cof" type="number" value="0.5" step="0.1"/></div>
+          <div><label class="flbl2">IVA locale (%)</label><input id="s-icm" type="number" value="22" step="0.5"/></div>
+          <div><label class="flbl2">Metodo calcolo</label><select id="s-ict"><option value="dentro" selected>Por dentro</option><option value="fora">Esclusivo</option></select></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:8px">Spese locali (EUR)</div>
+        <div class="mg2">
+          <div><label class="flbl2">Spese portuali</label><input id="s-des" type="number" value="680" step="100"/></div>
+          <div><label class="flbl2">Spedizioniere doganale</label><input id="s-dsp" type="number" value="420" step="100"/></div>
+          <div><label class="flbl2">Trasporto interno</label><input id="s-fri" type="number" value="320" step="100"/></div>
+          <div><label class="flbl2">Margine desiderato (%)</label><input id="s-mar" type="number" value="40" step="1"/></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card" style="background:var(--surf2)">
+        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">Costo totale sdoganato</div>
+        <div style="font-size:24px;font-weight:700;color:var(--brand);margin:6px 0 2px;line-height:1" id="sim-tot">R$ —</div>
+        <div style="font-size:11px;color:var(--t3)" id="sim-uni">por unidade: —</div>
+        <div class="dv"></div>
+        <div class="mg3b" style="margin-bottom:10px">
+          <div class="band bmin"><div class="blbl">Mínima</div><div class="bv" id="sb-min">—</div></div>
+          <div class="band bavg"><div class="blbl">Média</div><div class="bv" id="sb-avg">—</div></div>
+          <div class="band bcons"><div class="blbl">Cons.</div><div class="bv" id="sb-con">—</div></div>
+        </div>
+        <div id="sim-bk"></div>
+        <div class="dv"></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Prezzo suggerito</span><span style="font-weight:600;color:var(--acc)" id="sim-pc">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Margine finale</span><span style="font-weight:600;color:#16a34a" id="sim-mg">—</span></div>
+      </div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Composizione del costo</div>
+        <div style="position:relative;height:170px"><canvas id="ch-pie"></canvas></div>
+        <div id="pie-leg" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ─── Supabase Auth — credenciais reais ───────────────────────────────────────
+const SUPABASE_URL = 'https://cxogqprgmdkbpmlcdorg.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4b2dxcHJnbWRrYnBtbGNkb3JnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODg5MzksImV4cCI6MjA5MDY2NDkzOX0.URn4t-gh3mL8HpDUz78e_ec-B-neXukCZDTAr9OpSIs'
+
+const { createClient } = supabase
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+// ─── Login / Auth ─────────────────────────────────────────────────────────────
+async function doLogin(){
+  const email = document.getElementById('login-email').value.trim()
+  const pw    = document.getElementById('login-pw').value
+  const btn   = document.getElementById('login-btn')
+  const err   = document.getElementById('login-err')
+
+  if(!email || !pw){ err.textContent='Preencha e-mail e senha.'; return }
+
+  btn.disabled = true
+  btn.innerHTML = '<span class="spin"></span>Entrando...'
+  err.textContent = ''
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pw })
+
+  if(error){
+    err.textContent = error.message === 'Invalid login credentials'
+      ? 'E-mail ou senha incorretos.'
+      : 'Erro ao entrar: ' + error.message
+    btn.disabled = false
+    btn.textContent = 'Entrar'
+    return
+  }
+
+  showApp(data.user)
+}
+
+async function doReset(){
+  const email = document.getElementById('reset-email').value.trim()
+  const msg   = document.getElementById('reset-msg')
+  if(!email){ msg.textContent='Digite seu e-mail.'; return }
+
+  const { error } = await sb.auth.resetPasswordForEmail(email)
+  if(error){ msg.textContent='Erro: ' + error.message; return }
+
+  msg.style.color='#16a34a'
+  msg.textContent='Link enviado! Verifique seu e-mail.'
+}
+
+async function doLogout(){
+  await sb.auth.signOut()
+  document.getElementById('app').style.display='none'
+  document.getElementById('login-screen').style.display='flex'
+  document.getElementById('login-email').value=''
+  document.getElementById('login-pw').value=''
+  document.getElementById('login-btn').disabled=false
+  document.getElementById('login-btn').textContent='Entrar'
+}
+
+function showApp(user){
+  document.getElementById('login-screen').style.display='none'
+  document.getElementById('app').style.display='block'
+  document.getElementById('user-email-display').textContent = user.email
+  initApp()
+}
+
+function showReset(){ document.getElementById('login-form').style.display='none'; document.getElementById('reset-form').style.display='block' }
+function showLogin(){ document.getElementById('reset-form').style.display='none'; document.getElementById('login-form').style.display='block' }
+
+// ─── Dados Mock ───────────────────────────────────────────────────────────────
+const DB=[
+  {ncm:'7323.93.00',nome:'Scolapiatti in acciaio inox',desc:'Articoli per uso domestico in acciaio inossidabile',fob:2.85,cif:3.22,pkg:3.65,vol:'8.4M pz',trend:1.5,score:80,ii:0,ipi:22,pis:0.8,cof:0.5,icms:22,
+   ops:[{m:'Mar/25',fob:2.82,cif:3.18,qtd:720000,kg:568800,uf:'Genova',mod:'Marittimo',v:null},{m:'Feb/25',fob:2.85,cif:3.22,qtd:685000,kg:541150,uf:'Venezia',mod:'Marittimo',v:1.1},{m:'Gen/25',fob:2.88,cif:3.25,qtd:745000,kg:588550,uf:'Genova',mod:'Marittimo',v:1.1},{m:'Dic/24',fob:2.92,cif:3.30,qtd:620000,kg:489800,uf:'Trieste',mod:'Marittimo',v:1.4},{m:'Nov/24',fob:2.89,cif:3.26,qtd:710000,kg:560900,uf:'Genova',mod:'Marittimo',v:-1.0},{m:'Ott/24',fob:2.86,cif:3.23,qtd:695000,kg:549050,uf:'Venezia',mod:'Marittimo',v:-1.0}],
+   adm:{lic:false,an:[],al:['Dazi antidumping UE possibili su acciaio cinese','REACH compliance per materiali a contatto alimentare'],desc:'Importazione libera nella UE. Dazi MFN 0% acciaio cucina. Verificare misure antidumping specifiche.'}},
+  {ncm:'8516.50.00',nome:'Forni a microonde',desc:'Forni a microonde per uso domestico',fob:38.50,cif:42.80,pkg:12.40,vol:'3.2M pz',trend:2.8,score:83,ii:2,ipi:22,pis:0.8,cof:0.5,icms:22,
+   ops:[{m:'Mar/25',fob:38.20,cif:42.46,qtd:268000,kg:3323200,uf:'Genova',mod:'Marittimo',v:null},{m:'Feb/25',fob:38.50,cif:42.80,qtd:245000,kg:3038000,uf:'Venezia',mod:'Marittimo',v:0.8},{m:'Gen/25',fob:39.20,cif:43.58,qtd:282000,kg:3496800,uf:'Trieste',mod:'Marittimo',v:1.8},{m:'Dic/24',fob:38.80,cif:43.12,qtd:298000,kg:3695200,uf:'Genova',mod:'Marittimo',v:-1.0},{m:'Nov/24',fob:38.40,cif:42.68,qtd:275000,kg:3410000,uf:'Venezia',mod:'Marittimo',v:-1.0}],
+   adm:{lic:false,an:['Certificazione CE obbligatoria','Direttiva EMC 2014/30/UE','Direttiva bassa tensione 2014/35/UE'],al:['Marcatura CE obbligatoria — senza CE il prodotto e bloccato','Regolamento Ecodesign per efficienza energetica'],desc:'Certificazione CE obbligatoria. Dazio MFN 2%. Direttive EMC e bassa tensione applicabili. Conformita Ecodesign richiesta.'}},
+  {ncm:'6302.60.00',nome:'Tessili da cucina e strofinacci',desc:'Biancheria da cucina e strofinacci in cotone',fob:1.45,cif:1.68,pkg:8.20,vol:'52.1M pz',trend:-0.8,score:76,ii:12,ipi:22,pis:0.8,cof:0.5,icms:22,
+   ops:[{m:'Mar/25',fob:1.42,cif:1.64,qtd:4250000,kg:519500,uf:'Napoli',mod:'Marittimo',v:null},{m:'Feb/25',fob:1.45,cif:1.68,qtd:3980000,kg:486556,uf:'Genova',mod:'Marittimo',v:2.1},{m:'Gen/25',fob:1.48,cif:1.71,qtd:4520000,kg:552444,uf:'Napoli',mod:'Marittimo',v:2.1},{m:'Dic/24',fob:1.52,cif:1.76,qtd:5200000,kg:635556,uf:'Genova',mod:'Marittimo',v:2.7}],
+   adm:{lic:false,an:[],al:['Dazio MFN 12% — tessili cotone da Cina','Etichettatura composizione fibre obbligatoria Reg 1007/2011'],desc:'Soggetto a dazio MFN del 12%. Etichettatura composizione fibre obbligatoria secondo Regolamento UE 1007/2011.'}},
+  {ncm:'6204.62.31',nome:'Pantaloni donna cotone',desc:'Pantaloni da donna in cotone — lavorati a maglia',fob:5.20,cif:5.85,pkg:22.50,vol:'18.7M pz',trend:1.2,score:71,ii:12,ipi:22,pis:0.8,cof:0.5,icms:22,
+   ops:[{m:'Mar/25',fob:5.15,cif:5.79,qtd:1520000,kg:67556,uf:'Milano',mod:'Aereo',v:null},{m:'Feb/25',fob:5.20,cif:5.85,qtd:1380000,kg:61333,uf:'Roma',mod:'Aereo',v:1.0},{m:'Gen/25',fob:5.25,cif:5.91,qtd:1650000,kg:73333,uf:'Milano',mod:'Aereo',v:1.0}],
+   adm:{lic:false,an:['Etichettatura composizione fibre Reg 1007/2011'],al:['Dazio MFN 12% abbigliamento cotone','Indicazione paese di origine obbligatoria'],desc:'Dazio MFN 12%. Etichettatura composizione fibre e istruzioni lavaggio obbligatorie. Paese di origine deve essere indicato.'}},
+  {ncm:'8471.30.01',nome:'Computer portatili',desc:'Macchine per elaborazione automatica dati portatili',fob:295.00,cif:310.50,pkg:88.00,vol:'4.8M pz',trend:4.1,score:89,ii:0,ipi:22,pis:0.8,cof:0.5,icms:22,
+   ops:[{m:'Mar/25',fob:292.00,cif:307.30,qtd:402000,kg:35376,uf:'Milano',mod:'Aereo',v:null},{m:'Feb/25',fob:296.00,cif:311.51,qtd:368000,kg:32384,uf:'Roma',mod:'Aereo',v:1.4},{m:'Gen/25',fob:298.00,cif:313.52,qtd:425000,kg:37400,uf:'Milano',mod:'Aereo',v:0.7}],
+   adm:{lic:false,an:['Certificazione CE obbligatoria','Direttiva RoHS 2011/65/UE'],desc:'Dazio 0% accordo ITA. Certificazione CE obbligatoria. Conformita direttiva RoHS obbligatoria.'}},
+  {ncm:'3304.99.00',nome:'Cosmetici e cura della pelle',desc:'Preparazioni cosmetiche per la cura della pelle',fob:2.10,cif:2.45,pkg:14.80,vol:'22.4M pz',trend:3.8,score:74,ii:6.5,ipi:22,pis:0.8,cof:0.5,icms:22,
+   ops:[{m:'Mar/25',fob:2.08,cif:2.42,qtd:1850000,kg:125000,uf:'Milano',mod:'Aereo',v:null},{m:'Feb/25',fob:2.10,cif:2.45,qtd:1720000,kg:116216,uf:'Roma',mod:'Aereo',v:1.0},{m:'Gen/25',fob:2.14,cif:2.49,qtd:1980000,kg:133784,uf:'Milano',mod:'Aereo',v:1.9}],
+   adm:{lic:false,an:['Regolamento cosmetici UE CE 1223/2009','Notifica CPNP obbligatoria'],al:['Notifica obbligatoria nel Cosmetic Products Notification Portal','Lista INCI ingredienti obbligatoria'],desc:'Regolamento CE 1223/2009 applicabile. Notifica CPNP obbligatoria prima della immissione sul mercato. Lista INCI obbligatoria.'}}
+];
+
+let CP=null,CH={},PTAX_SRC='fallback';
+const fB=v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fU=v=>'U$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fN=v=>v.toLocaleString('pt-BR');
+const scC=s=>s>=75?'#16a34a':s>=50?'#b45309':'#dc2626';
+const scV=s=>s>=75?'alta':s>=50?'media':'baixa';
+const scL=s=>s>=75?'Alta confiança':s>=50?'Média confiança':'Baixa confiança';
+const C=()=>parseFloat(document.getElementById('cambio').value)||5.15;
+
+function initApp(){ rFeat(C()); calcSim(); fetchPTAX(); }
+
+async function fetchPTAX(){
+  const barEl = document.getElementById('ptax-bar');
+  try{
+    const hoje=new Date();
+    for(let d=0;d<5;d++){
+      const dt=new Date(hoje);dt.setDate(dt.getDate()-d);
+      const dd=String(dt.getDate()).padStart(2,'0'),mm=String(dt.getMonth()+1).padStart(2,'0'),yyyy=dt.getFullYear();
+      const url='https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda=%27EUR%27&@dataCotacao=%27'+mm+'-'+dd+'-'+yyyy+'%27&$top=1&$orderby=horaBoletim%20desc&$format=json&$select=cotacaoVenda';
+      const res=await fetch(url);if(!res.ok)continue;
+      const json=await res.json();
+      if(json?.value?.length){
+        const eurBrl=json.value[0].cotacaoVenda;
+        const usdEur=parseFloat((1/eurBrl*5.15).toFixed(4));
+        PTAX_SRC='real';
+        document.getElementById('cambio').value=usdEur.toFixed(4);
+        document.getElementById('s-cam').value=usdEur.toFixed(4);
+        barEl.innerHTML='<span style="color:#16a34a">&#10003;</span> <strong>Cambio EUR:</strong> 1 EUR = R$ '+eurBrl.toFixed(4)+' <span style="font-size:9px;font-weight:600;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">BANCA CENTRALE BR</span>';
+        barEl.style.cssText='background:#f0fdf4;border:0.5px solid #86efac;border-radius:6px;padding:7px 10px;font-size:11px;color:#166534;display:flex;align-items:center;gap:8px;margin-bottom:8px';
+        if(CP)load(CP);rFeat(C());return;
+      }
+    }
+    throw new Error('no rate');
+  }catch(e){
+    barEl.innerHTML='Tasso non disponibile — usando USD/EUR 0.92';
+    barEl.style.cssText='background:#fffbeb;border:0.5px solid #fcd34d;border-radius:6px;padding:7px 10px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;margin-bottom:8px';
+  }
+  // end fetchPTAX
+}
+
+function pg(id,el){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  if(id==='graficos'&&CP)rCharts();
+}
+
+function onInput(v){
+  const box=document.getElementById('sugg');
+  if(v.length<2){box.style.display='none';return}
+  const q=v.toLowerCase();
+  const m=DB.filter(p=>p.ncm.includes(v)||p.nome.toLowerCase().includes(q));
+  if(!m.length){box.style.display='none';return}
+  box.innerHTML=m.slice(0,5).map(p=>`<div class="si" onclick="sel('${p.ncm}')"><span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px;flex-shrink:0">${p.ncm}</span><span>${p.nome}</span></div>`).join('');
+  box.style.display='';
+}
+
+function doSearch(){
+  const v=document.getElementById('qi').value.trim();if(!v)return;
+  const p=DB.find(x=>x.ncm===v||x.nome.toLowerCase().includes(v.toLowerCase()));
+  p?load(p):(document.getElementById('dash-alert').innerHTML='<strong>Não encontrado.</strong>');
+  document.getElementById('sugg').style.display='none';
+}
+
+function sel(ncm){
+  const p=DB.find(x=>x.ncm===ncm);if(!p)return;
+  document.getElementById('qi').value=p.nome;document.getElementById('sugg').style.display='none';load(p);
+}
+
+function nac(p,c){const cf=p.cif*c,ii=cf*p.ii/100,ipi=(cf+ii)*p.ipi/100,ps=cf*p.pis/100,co=cf*p.cof/100,b=cf+ii+ipi+ps+co;return b+b*p.icms/(100-p.icms)+0.5;}
+
+function load(p){
+  CP=p;const c=C();
+  document.getElementById('d-fob-usd').textContent=fU(p.fob)+'/un';
+  document.getElementById('d-fob-brl').textContent=fB(p.fob*c)+'/un';
+  document.getElementById('d-pkg').textContent=fU(p.pkg)+'/kg';
+  document.getElementById('d-vol').textContent=p.vol;
+  document.getElementById('d-sc').textContent=p.score+'/100';
+  document.getElementById('d-cf').style.cssText='width:'+p.score+'%;background:'+scC(p.score);
+  document.getElementById('d-nac').textContent=fB(nac(p,c));
+  document.getElementById('r-nome').textContent=p.nome;
+  document.getElementById('r-ncm').textContent=p.ncm;
+  document.getElementById('r-per').textContent='Últimos '+document.getElementById('fp').value+' meses';
+  const sb=document.getElementById('r-sb');sb.textContent=scL(p.score);sb.className='bdg b-'+scV(p.score);
+  document.getElementById('r-fob-u').textContent=fU(p.fob);
+  document.getElementById('r-fob-b').textContent=fB(p.fob*c);
+  document.getElementById('r-fob-bs').textContent='câmbio '+c.toFixed(2)+' ('+PTAX_SRC+')';
+  document.getElementById('r-cif').textContent=fU(p.cif);
+  document.getElementById('r-pkg').textContent=fU(p.pkg)+'/kg';
+  document.getElementById('r-vol').textContent=p.vol;
+  document.getElementById('r-tick').textContent=fU(p.fob*(p.ops[0]?.qtd||1000));
+  document.getElementById('b-min').textContent=fB(p.fob*c*0.85);
+  document.getElementById('b-avg').textContent=fB(p.fob*c);
+  document.getElementById('b-cons').textContent=fB(p.fob*c*1.18);
+  const ring=document.getElementById('sring');
+  ring.style.strokeDashoffset=(125.6-125.6*p.score/100).toFixed(1);ring.style.stroke=scC(p.score);
+  document.getElementById('snum').textContent=p.score;
+  const facts=[['NCM confirmada',true],['Unidade consistente',true],['Amostra ≥6 meses',p.ops.length>=6],['Dados oficiais',false],['PTAX real',PTAX_SRC==='real']];
+  document.getElementById('sfacts').innerHTML=facts.map(([l,ok])=>`<span style="color:${ok?'#16a34a':'#dc2626'};font-size:11px;line-height:1.5">${ok?'✓':'✗'} ${l}</span>`).join('');
+  document.getElementById('otable').innerHTML=p.ops.map(o=>{
+    const vt=o.v===null?'—':o.v>0?`<span class="tu">▲ ${o.v}%</span>`:`<span class="td2">▼ ${Math.abs(o.v)}%</span>`;
+    return`<tr><td><strong>${o.m}</strong></td><td>${fU(o.fob)}</td><td>${fU(o.cif)}</td><td>${fN(o.qtd)}</td><td>${fN(o.kg)}</td><td style="font-family:monospace;font-size:11px">${o.uf}</td><td>${o.mod}</td><td>${vt}</td></tr>`;
+  }).join('');
+  const a=p.adm;
+  let h=`<div class="al ${a.lic?'al-warn':'al-ok'}"><strong>Licença prévia:</strong> ${a.lic?'Exigida':'Não exigida'}</div>`;
+  if(a.an.length)h+=`<div class="al al-warn"><strong>Anuências:</strong><ul style="margin:4px 0 0 14px;line-height:1.8">${a.an.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+  h+=`<div style="font-size:12px;color:#6b7280;line-height:1.7;margin-bottom:10px">${a.desc}</div>`;
+  if(a.al.length)h+=`<div class="stitle" style="margin-bottom:6px">Alertas</div>`+a.al.map(x=>`<div class="admi">${x}</div>`).join('');
+  document.getElementById('adm-card').innerHTML=h;
+  document.getElementById('r-alerts').innerHTML=p.score<75?`<div class="al al-warn">Score ${p.score}/100 — estimativa inicial.</div>`:'';
+  document.getElementById('dash-alert').innerHTML='<strong>'+p.nome+'</strong> · '+p.ncm+' carregado.';
+  preSim(p,c);rFeat(c);
+}
+
+function rFeat(c){
+  document.getElementById('ftable').innerHTML=DB.map(p=>{
+    const up=p.trend>0,tc=up?'tu':'td2',ta=up?'▲':'▼';
+    const sv=scV(p.score),bl=sv==='alta'?'Alta':sv==='media'?'Média':'Baixa';
+    const act=CP&&CP.ncm===p.ncm?'background:#eff6ff;':'';
+    return`<tr onclick="sel('${p.ncm}')" style="cursor:pointer;${act}"><td><span style="font-family:monospace;font-size:11px">${p.ncm}</span></td><td style="font-weight:500">${p.nome}</td><td>${fU(p.fob)}</td><td>${fB(p.fob*c)}</td><td><span class="${tc}">${ta} ${Math.abs(p.trend).toFixed(1)}%</span></td><td><span class="bdg b-${sv}">${bl}</span></td><td><button class="sbtn" onclick="event.stopPropagation();sel('${p.ncm}')">Ver</button></td></tr>`;
+  }).join('');
+}
+
+function rt(id,el){
+  ['precos','ops','adm'].forEach(t=>document.getElementById('rp-'+t).style.display='none');
+  document.getElementById('rp-'+id).style.display='';
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+}
+
+function onCambio(){if(CP)load(CP);else rFeat(C());}
+function preSim(p,c){
+  document.getElementById('s-prod').value=p.nome;document.getElementById('s-ncm').value=p.ncm;
+  document.getElementById('s-fob').value=p.fob;document.getElementById('s-cam').value=c.toFixed(2);
+  document.getElementById('s-ii').value=p.ii;document.getElementById('s-ipi').value=p.ipi;
+  document.getElementById('s-pis').value=p.pis;document.getElementById('s-cof').value=p.cof;document.getElementById('s-icm').value=p.icms;
+}
+
+function gv(id){return parseFloat(document.getElementById(id).value)||0}
+function calcSim(){
+  const qtd=gv('s-qtd'),fob=gv('s-fob'),frt=gv('s-frt'),seg=gv('s-seg'),c=gv('s-cam');
+  const ii=gv('s-ii')/100,ipi=gv('s-ipi')/100,pis=gv('s-pis')/100,cof=gv('s-cof')/100,icm=gv('s-icm')/100;
+  const afr=gv('s-afr')/100,des=gv('s-des'),dsp=gv('s-dsp'),fri=gv('s-fri'),mar=gv('s-mar')/100;
+  const tipo=document.getElementById('s-ict').value;
+  const fT=fob*qtd,cifU=fT+frt+seg,cifB=cifU*c;
+  const afrB=frt*c*afr,iiB=cifB*ii,ipiB=(cifB+iiB)*ipi,pisB=cifB*pis,cofB=cifB*cof;
+  const base=cifB+iiB+ipiB+pisB+cofB;
+  const icmB=tipo==='dentro'?base*icm/(1-icm):base*icm;
+  const tot=cifB+afrB+iiB+ipiB+pisB+cofB+icmB+des+dsp+fri;
+  const uni=tot/qtd,preco=uni/(1-mar);
+  document.getElementById('sim-tot').textContent=fB(tot);
+  document.getElementById('sim-uni').textContent='por unidade: '+fB(uni);
+  document.getElementById('sb-min').textContent=fB(uni*0.92);document.getElementById('sb-avg').textContent=fB(uni);document.getElementById('sb-con').textContent=fB(uni*1.15);
+  document.getElementById('sim-pc').textContent=fB(preco)+'/un';document.getElementById('sim-mg').textContent=(mar*100).toFixed(1)+'%';
+  const lines=[['FOB total',fU(fT),''],['CIF (USD)',fU(cifU),''],['CIF (BRL)',fB(cifB),'câmbio '+c.toFixed(2)],['AFRMM',fB(afrB),gv('s-afr')+'%'],['II',fB(iiB),gv('s-ii')+'%'],['IPI',fB(ipiB),gv('s-ipi')+'%'],['PIS',fB(pisB),gv('s-pis')+'%'],['COFINS',fB(cofB),gv('s-cof')+'%'],['ICMS',fB(icmB),gv('s-icm')+'%'],['Desp. locais',fB(des),''],['Spedizioniere doganale',fB(dsp),''],['Trasporto interno',fB(fri),'']];
+  document.getElementById('sim-bk').innerHTML=lines.map(([l,v,n])=>`<div class="sl"><span style="color:#6b7280">${l}</span><span>${v}<span style="font-size:10px;color:#9ca3af;margin-left:5px">${n}</span></span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;font-weight:700;color:#0F4C81"><span>Total</span><span>${fB(tot)}</span></div><div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;font-weight:600;color:#E8621A"><span>Por unidade</span><span>${fB(uni)}</span></div>`;
+  rPie([cifB,afrB,iiB,ipiB,pisB,cofB,icmB,des+dsp+fri]);
+}
+
+function rPie(vals){
+  const labs=['CIF BRL','AFRMM','II','IPI','PIS','COFINS','ICMS','Outros'];
+  const cols=['#0F4C81','#1a6ab5','#E8621A','#f5894a','#16a34a','#2563eb','#7c3aed','#64748b'];
+  dC('ch-pie');
+  CH['ch-pie']=new Chart(document.getElementById('ch-pie'),{type:'doughnut',data:{labels:labs,datasets:[{data:vals,backgroundColor:cols,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'55%'}});
+  const tot=vals.reduce((a,b)=>a+b,0);
+  document.getElementById('pie-leg').innerHTML=labs.map((l,i)=>`<span style="display:flex;align-items:center;gap:3px;font-size:10px;color:#9ca3af"><span style="width:8px;height:8px;border-radius:2px;background:${cols[i]};display:inline-block;flex-shrink:0"></span>${l} ${Math.round(vals[i]/tot*100)}%</span>`).join('');
+}
+
+function rCharts(){
+  if(!CP)return;
+  const p=CP,c=C(),ops=[...p.ops].reverse(),labs=ops.map(o=>o.m);
+  document.getElementById('g-sub').textContent=p.nome+' · '+p.ncm;
+  dC('ch-fob');
+  CH['ch-fob']=new Chart(document.getElementById('ch-fob'),{type:'line',data:{labels:labs,datasets:[{label:'FOB USD',data:ops.map(o=>o.fob),borderColor:'#0F4C81',borderWidth:2,pointRadius:3,tension:0.3,fill:false},{label:'CIF USD',data:ops.map(o=>o.cif),borderColor:'#E8621A',borderWidth:2,pointRadius:2,tension:0.3,fill:false,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},autoSkip:true,maxRotation:45}},y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(2)}}}}});
+  const nacs=ops.map(o=>{const cb=o.cif*c,ii=cb*p.ii/100,ipi=(cb+ii)*p.ipi/100,ps=cb*p.pis/100,co=cb*p.cof/100,b=cb+ii+ipi+ps+co;return parseFloat((b+b*p.icms/(100-p.icms)+0.5).toFixed(2));});
+  dC('ch-cmp');
+  CH['ch-cmp']=new Chart(document.getElementById('ch-cmp'),{type:'bar',data:{labels:labs,datasets:[{label:'FOB BRL',data:ops.map(o=>parseFloat((o.fob*c).toFixed(2))),backgroundColor:'#0F4C81',borderRadius:3,maxBarThickness:14},{label:'Nac.',data:nacs,backgroundColor:'#E8621A',borderRadius:3,maxBarThickness:14}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},autoSkip:true,maxRotation:45}},y:{ticks:{font:{size:10},callback:v=>'R$'+v.toFixed(0)}}}}});
+  const mc={};ops.forEach(o=>{mc[o.mod]=(mc[o.mod]||0)+1});
+  const mk=Object.keys(mc),mv=Object.values(mc),cols=['#0F4C81','#E8621A','#16a34a','#7c3aed'];
+  dC('ch-mod');
+  CH['ch-mod']=new Chart(document.getElementById('ch-mod'),{type:'doughnut',data:{labels:mk,datasets:[{data:mv,backgroundColor:cols.slice(0,mk.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'55%'}});
+  document.getElementById('ch-mod-leg').innerHTML=mk.map((k,i)=>`<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:${cols[i]};display:inline-block;flex-shrink:0"></span>${k} — ${Math.round(mv[i]/p.ops.length*100)}%</span>`).join('');
+  const uc={};ops.forEach(o=>{uc[o.uf]=(uc[o.uf]||0)+1});
+  dC('ch-uf');
+  CH['ch-uf']=new Chart(document.getElementById('ch-uf'),{type:'bar',data:{labels:Object.keys(uc),datasets:[{data:Object.values(uc),backgroundColor:'#1a6ab5',borderRadius:3,maxBarThickness:22}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11}}},y:{ticks:{font:{size:10},stepSize:1}}}}});
+}
+
+function dC(id){if(CH[id]){CH[id].destroy();CH[id]=null;}}
+
+function expCSV(){
+  if(!CP){alert('Consulte um produto primeiro.');return}
+  const p=CP;
+  const rows=['NCM,Produto,FOB USD,CIF USD,Volume,Score',`${p.ncm},"${p.nome}",${p.fob},${p.cif},"${p.vol}",${p.score}`,'','Mes,FOB USD,CIF USD,Qtd,Kg,UF,Modal',...p.ops.map(o=>`${o.m},${o.fob},${o.cif},${o.qtd},${o.kg},${o.uf},${o.mod}`)];
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download=`importaITA_${p.ncm.replace(/\./g,'')}.csv`;a.click();
+}
+
+// ─── Init — verifica sessão existente ─────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const { data: { session } } = await sb.auth.getSession()
+  if(session){
+    showApp(session.user)
+  } else {
+    setTimeout(()=>document.getElementById('login-email').focus(), 100)
+  }
+
+  // Escuta mudanças de auth (logout de outra aba, etc)
+  sb.auth.onAuthStateChange((event, session) => {
+    if(event === 'SIGNED_OUT'){
+      document.getElementById('app').style.display='none'
+      document.getElementById('login-screen').style.display='flex'
+    }
+  })
+})
+</script>
+</body>
+</html>
