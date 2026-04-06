@@ -108,7 +108,7 @@ tr:hover td{background:var(--surf2)}
 <div id="login-screen">
   <div class="login-box" id="login-box">
     <div class="login-logo">importa<b>ITA</b></div>
-    <div class="login-sub">intelligenza commerciale Cina → Italia</div>
+    <div class="login-sub">inteligência de importação China → Itália</div>
     <div class="login-badge">🔒 Login seguro via Supabase</div>
 
     <div id="login-form">
@@ -130,8 +130,8 @@ tr:hover td{background:var(--surf2)}
     </div>
 
     <div class="finfo">
-      Accesso limitato · importaITA<br>
-      Richiedere accesso
+      Acesso restrito · importaITA<br>
+      Solicite acesso ao administrador
     </div>
   </div>
 </div>
@@ -141,12 +141,12 @@ tr:hover td{background:var(--surf2)}
 <div class="topbar">
   <div class="logo">importa<b>ITA</b></div>
   <div class="sep"></div>
-  <span class="tsub">Cina → Italia · intelligenza commerciale</span>
+  <span class="tsub">China → Itália · inteligência de importação</span>
   <nav class="tnav">
     <button class="nb on" onclick="pg('dashboard',this)">Dashboard</button>
-    <button class="nb" onclick="pg('resultado',this)">Risultati</button>
-    <button class="nb" onclick="pg('graficos',this)">Analisi</button>
-    <button class="nb" onclick="pg('simulador',this)">Simulatore</button>
+    <button class="nb" onclick="pg('resultado',this)">Resultado</button>
+    <button class="nb" onclick="pg('graficos',this)">Análise</button>
+    <button class="nb" onclick="pg('simulador',this)">Simulador</button>
     <div class="user-chip">
       <span id="user-email-display">—</span>
       <span class="logout-link" onclick="doLogout()">sair</span>
@@ -158,21 +158,21 @@ tr:hover td{background:var(--surf2)}
 <aside class="side">
   <div>
     <div class="stitle">Busca</div>
-    <input id="qi" placeholder="Prodotto, codice NC o parola chiave..." oninput="onInput(this.value)" autocomplete="off"/>
+    <input id="qi" placeholder="Produto, código NC ou palavra-chave..." oninput="onInput(this.value)" autocomplete="off"/>
     <div id="sugg" style="display:none" class="sugg"></div>
-    <button class="pbtn" onclick="doSearch()">Cerca</button>
+    <button class="pbtn" onclick="doSearch()">Consultar</button>
   </div>
   <div class="dv" style="margin:2px 0"></div>
   <div style="display:flex;flex-direction:column;gap:8px">
     <div class="stitle">Filtros</div>
-    <div><label class="flbl2">Periodo</label><select id="fp"><option value="3">3 mesi</option><option value="6">6 mesi</option><option value="12" selected>12 mesi</option><option value="24">24 mesi</option></select></div>
-    <div><label class="flbl2">Porto di entrata</label><select id="fuf"><option value="">Todos</option><option>SP</option><option>SC</option><option>RJ</option><option>PR</option><option>RS</option></select></div>
-    <div><label class="flbl2">Modalita</label><select id="fmod"><option value="">Todos</option><option>Marittimo</option><option>Aereo</option><option>Courier</option></select></div>
-    <div><label class="flbl2">Cambio USD/EUR</label><input type="number" id="cambio" value="5.15" step="0.01" min="1" onchange="onCambio()"/></div>
+    <div><label class="flbl2">Período</label><select id="fp"><option value="3">3 meses</option><option value="6">6 meses</option><option value="12" selected>12 meses</option><option value="24">24 meses</option></select></div>
+    <div><label class="flbl2">Porto de entrada</label><select id="fuf"><option value="">Todos</option><option>SP</option><option>SC</option><option>RJ</option><option>PR</option><option>RS</option></select></div>
+    <div><label class="flbl2">Modal</label><select id="fmod"><option value="">Todos</option><option>Marítimo</option><option>Aéreo</option><option>Courier</option></select></div>
+    <div><label class="flbl2">Câmbio USD/EUR</label><input type="number" id="cambio" value="5.15" step="0.01" min="1" onchange="onCambio()"/></div>
   </div>
   <div class="dv" style="margin:2px 0"></div>
   <div>
-    <div class="stitle">Storico</div>
+    <div class="stitle">Histórico</div>
     <div style="margin-top:4px">
       <div class="hi" onclick="sel('7323.93.00')"><span class="hncm">7323.93.00</span><span style="font-size:11px">Scolapiatti inox</span></div>
       <div class="hi" onclick="sel('8516.50.00')"><span class="hncm">8516.50.00</span><span style="font-size:11px">Forni microonde</span></div>
@@ -181,7 +181,7 @@ tr:hover td{background:var(--surf2)}
     </div>
   </div>
   <div style="margin-top:auto;padding-top:10px;border-top:0.5px solid var(--bd)">
-    <div style="font-size:10px;color:#d1d5db;line-height:1.6"><span style="color:var(--acc);font-weight:600;display:block;margin-bottom:2px">Dati simulati — MVP</span>Stime per dimostrazione.</div>
+    <div style="font-size:10px;color:#d1d5db;line-height:1.6"><span style="color:var(--acc);font-weight:600;display:block;margin-bottom:2px">Dados simulados — MVP</span>Estimativa para demonstração.</div>
   </div>
 </aside>
 
@@ -189,12 +189,12 @@ tr:hover td{background:var(--surf2)}
 
 <div class="page on" id="page-dashboard">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-    <div><div style="font-size:17px;font-weight:600;margin-bottom:2px">Pannello importazioni</div><div style="font-size:11px;color:var(--t3)">Cina → Italia · ISTAT / Banca d'Italia</div></div>
-    <div style="display:flex;gap:8px;align-items:center"><span class="bdg b-sim">Dados simulados</span><button class="sbtn" onclick="expCSV()">Esporta CSV</button></div>
+    <div><div style="font-size:17px;font-weight:600;margin-bottom:2px">Painel de importações</div><div style="font-size:11px;color:var(--t3)">China → Itália · ISTAT / Banca d'Italia</div></div>
+    <div style="display:flex;gap:8px;align-items:center"><span class="bdg b-sim">Dados simulados</span><button class="sbtn" onclick="expCSV()">Exportar CSV</button></div>
   </div>
-  <div class="sec-bar">🔒 Sessione autenticata via Supabase · JWT sicuro</div>
+  <div class="sec-bar">🔒 Sessão autenticada via Supabase · JWT seguro</div>
   <div id="ptax-bar" class="ptax-bar"><span class="spin"></span> Buscando câmbio PTAX...</div>
-  <div class="al al-info" id="dash-alert">Cerca un prodotto. Es: <strong>scolapiatti inox</strong></div>
+  <div class="al al-info" id="dash-alert">Busque um produto. Ex: <strong>scolapiatti inox</strong></div>
   <div class="mg3">
     <div class="mc"><div class="mlbl">FOB médio / USD</div><div class="mval" id="d-fob-usd">—</div><div class="msub">por unidade</div></div>
     <div class="mc"><div class="mlbl">FOB médio / BRL</div><div class="mval" id="d-fob-brl">—</div><div class="msub" id="d-cs">—</div></div>
@@ -204,8 +204,8 @@ tr:hover td{background:var(--surf2)}
     <div class="mc"><div class="mlbl">Custo nac. est.</div><div class="mval" id="d-nac">—</div><div class="msub">BRL/un</div></div>
   </div>
   <div class="card">
-    <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:10px">Prodotti in evidenza</div>
-    <div style="overflow-x:auto"><table><thead><tr><th>NCM</th><th>Produto</th><th>FOB USD</th><th>BRL/un</th><th>Tendência</th><th>Confiança</th><th></th></tr></thead><tbody id="ftable"></tbody></table></div>
+    <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:10px">Produtos em destaque</div>
+    <div style="overflow-x:auto"><table><thead><tr><th>NC</th><th>Produto</th><th>FOB USD</th><th>BRL/un</th><th>Tendência</th><th>Confiança</th><th></th></tr></thead><tbody id="ftable"></tbody></table></div>
   </div>
 </div>
 
@@ -215,7 +215,7 @@ tr:hover td{background:var(--surf2)}
       <div style="font-size:17px;font-weight:600;margin-bottom:6px" id="r-nome">—</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="ncmt" id="r-ncm">—</span><span class="bdg b-cn">China</span><span class="bdg" id="r-sb">—</span></div>
     </div>
-    <div style="text-align:right"><div style="font-size:10px;color:var(--t3)">Periodo</div><div style="font-size:12px;font-weight:600" id="r-per">—</div></div>
+    <div style="text-align:right"><div style="font-size:10px;color:var(--t3)">Período</div><div style="font-size:12px;font-weight:600" id="r-per">—</div></div>
   </div>
   <div id="r-alerts"></div>
   <div class="tabs">
@@ -256,7 +256,7 @@ tr:hover td{background:var(--surf2)}
       </div>
     </div>
   </div>
-  <div id="rp-ops" style="display:none"><div class="card"><div style="overflow-x:auto"><table><thead><tr><th>Mês</th><th>FOB USD</th><th>CIF USD</th><th>Qtd</th><th>Peso kg</th><th>UF</th><th>Modalita</th><th>Var.</th></tr></thead><tbody id="otable"></tbody></table></div></div></div>
+  <div id="rp-ops" style="display:none"><div class="card"><div style="overflow-x:auto"><table><thead><tr><th>Mês</th><th>FOB USD</th><th>CIF USD</th><th>Qtd</th><th>Peso kg</th><th>UF</th><th>Modal</th><th>Var.</th></tr></thead><tbody id="otable"></tbody></table></div></div></div>
   <div id="rp-adm" style="display:none"><div class="card" id="adm-card"></div></div>
 </div>
 
@@ -281,10 +281,10 @@ tr:hover td{background:var(--surf2)}
   <div style="display:grid;grid-template-columns:1fr 350px;gap:14px;align-items:start">
     <div style="display:flex;flex-direction:column;gap:12px">
       <div class="card">
-        <div class="stitle" style="margin-bottom:8px">Prodotto e operazione</div>
+        <div class="stitle" style="margin-bottom:8px">Produto e operação</div>
         <div class="mg2">
           <div><label class="flbl2">Produto</label><input id="s-prod" value="Scolapiatti in acciaio inox"/></div>
-          <div><label class="flbl2">NCM</label><input id="s-ncm" value="7323.93.00" style="font-family:monospace;font-size:11px"/></div>
+          <div><label class="flbl2">NC</label><input id="s-ncm" value="7323.93.00" style="font-family:monospace;font-size:11px"/></div>
           <div><label class="flbl2">Quantidade (un)</label><input id="s-qtd" type="number" value="1000" min="1"/></div>
           <div><label class="flbl2">Unit. FOB (USD)</label><input id="s-fob" type="number" value="2.85" step="0.01"/></div>
           <div><label class="flbl2">Frete total (USD)</label><input id="s-frt" type="number" value="950" step="10"/></div>
@@ -294,29 +294,29 @@ tr:hover td{background:var(--surf2)}
         </div>
       </div>
       <div class="card">
-        <div class="stitle" style="margin-bottom:8px">Aliquote doganali</div>
+        <div class="stitle" style="margin-bottom:8px">Alíquotas e tarifas</div>
         <div class="mg2">
           <div><label class="flbl2">II (%)</label><input id="s-ii" type="number" value="0" step="0.5"/></div>
-          <div><label class="flbl2">IVA import (%)</label><input id="s-ipi" type="number" value="22" step="0.5"/></div>
-          <div><label class="flbl2">Diritti doganali (%)</label><input id="s-pis" type="number" value="0.8" step="0.1"/></div>
-          <div><label class="flbl2">Spese bancarie (%)</label><input id="s-cof" type="number" value="0.5" step="0.1"/></div>
-          <div><label class="flbl2">IVA locale (%)</label><input id="s-icm" type="number" value="22" step="0.5"/></div>
-          <div><label class="flbl2">Metodo calcolo</label><select id="s-ict"><option value="dentro" selected>Por dentro</option><option value="fora">Esclusivo</option></select></div>
+          <div><label class="flbl2">IVA importação (%)</label><input id="s-ipi" type="number" value="22" step="0.5"/></div>
+          <div><label class="flbl2">Direitos aduaneiros (%)</label><input id="s-pis" type="number" value="0.8" step="0.1"/></div>
+          <div><label class="flbl2">Despesas bancárias (%)</label><input id="s-cof" type="number" value="0.5" step="0.1"/></div>
+          <div><label class="flbl2">IVA local (%)</label><input id="s-icm" type="number" value="22" step="0.5"/></div>
+          <div><label class="flbl2">Método de cálculo</label><select id="s-ict"><option value="dentro" selected>Por dentro</option><option value="fora">Exclusivo</option></select></div>
         </div>
       </div>
       <div class="card">
-        <div class="stitle" style="margin-bottom:8px">Spese locali (EUR)</div>
+        <div class="stitle" style="margin-bottom:8px">Despesas locais (EUR)</div>
         <div class="mg2">
-          <div><label class="flbl2">Spese portuali</label><input id="s-des" type="number" value="680" step="100"/></div>
-          <div><label class="flbl2">Spedizioniere doganale</label><input id="s-dsp" type="number" value="420" step="100"/></div>
-          <div><label class="flbl2">Trasporto interno</label><input id="s-fri" type="number" value="320" step="100"/></div>
-          <div><label class="flbl2">Margine desiderato (%)</label><input id="s-mar" type="number" value="40" step="1"/></div>
+          <div><label class="flbl2">Despesas portuárias</label><input id="s-des" type="number" value="680" step="100"/></div>
+          <div><label class="flbl2">Despachante aduaneiro</label><input id="s-dsp" type="number" value="420" step="100"/></div>
+          <div><label class="flbl2">Frete interno</label><input id="s-fri" type="number" value="320" step="100"/></div>
+          <div><label class="flbl2">Margem desejada (%)</label><input id="s-mar" type="number" value="40" step="1"/></div>
         </div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px">
       <div class="card" style="background:var(--surf2)">
-        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">Costo totale sdoganato</div>
+        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">Custo total nacionalizado</div>
         <div style="font-size:24px;font-weight:700;color:var(--brand);margin:6px 0 2px;line-height:1" id="sim-tot">R$ —</div>
         <div style="font-size:11px;color:var(--t3)" id="sim-uni">por unidade: —</div>
         <div class="dv"></div>
@@ -327,11 +327,11 @@ tr:hover td{background:var(--surf2)}
         </div>
         <div id="sim-bk"></div>
         <div class="dv"></div>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Prezzo suggerito</span><span style="font-weight:600;color:var(--acc)" id="sim-pc">—</span></div>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Margine finale</span><span style="font-weight:600;color:#16a34a" id="sim-mg">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Preço sugerido</span><span style="font-weight:600;color:var(--acc)" id="sim-pc">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Margem final</span><span style="font-weight:600;color:#16a34a" id="sim-mg">—</span></div>
       </div>
       <div class="card">
-        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Composizione del costo</div>
+        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Composição do custo</div>
         <div style="position:relative;height:170px"><canvas id="ch-pie"></canvas></div>
         <div id="pie-leg" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px"></div>
       </div>
@@ -467,7 +467,7 @@ async function fetchPTAX(){
     }
     throw new Error('no rate');
   }catch(e){
-    barEl.innerHTML='Tasso non disponibile — usando USD/EUR 0.92';
+    barEl.innerHTML='Taxa não disponível — usando fallback USD/EUR 0,92';
     barEl.style.cssText='background:#fffbeb;border:0.5px solid #fcd34d;border-radius:6px;padding:7px 10px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;margin-bottom:8px';
   }
   // end fetchPTAX
@@ -531,7 +531,7 @@ function load(p){
   const ring=document.getElementById('sring');
   ring.style.strokeDashoffset=(125.6-125.6*p.score/100).toFixed(1);ring.style.stroke=scC(p.score);
   document.getElementById('snum').textContent=p.score;
-  const facts=[['NCM confirmada',true],['Unidade consistente',true],['Amostra ≥6 meses',p.ops.length>=6],['Dados oficiais',false],['PTAX real',PTAX_SRC==='real']];
+  const facts=[['NC confirmado',true],['Unidade consistente',true],['Amostra ≥6 meses',p.ops.length>=6],['Dados oficiais',false],['PTAX real',PTAX_SRC==='real']];
   document.getElementById('sfacts').innerHTML=facts.map(([l,ok])=>`<span style="color:${ok?'#16a34a':'#dc2626'};font-size:11px;line-height:1.5">${ok?'✓':'✗'} ${l}</span>`).join('');
   document.getElementById('otable').innerHTML=p.ops.map(o=>{
     const vt=o.v===null?'—':o.v>0?`<span class="tu">▲ ${o.v}%</span>`:`<span class="td2">▼ ${Math.abs(o.v)}%</span>`;
@@ -587,7 +587,7 @@ function calcSim(){
   document.getElementById('sim-uni').textContent='por unidade: '+fB(uni);
   document.getElementById('sb-min').textContent=fB(uni*0.92);document.getElementById('sb-avg').textContent=fB(uni);document.getElementById('sb-con').textContent=fB(uni*1.15);
   document.getElementById('sim-pc').textContent=fB(preco)+'/un';document.getElementById('sim-mg').textContent=(mar*100).toFixed(1)+'%';
-  const lines=[['FOB total',fU(fT),''],['CIF (USD)',fU(cifU),''],['CIF (BRL)',fB(cifB),'câmbio '+c.toFixed(2)],['AFRMM',fB(afrB),gv('s-afr')+'%'],['II',fB(iiB),gv('s-ii')+'%'],['IPI',fB(ipiB),gv('s-ipi')+'%'],['PIS',fB(pisB),gv('s-pis')+'%'],['COFINS',fB(cofB),gv('s-cof')+'%'],['ICMS',fB(icmB),gv('s-icm')+'%'],['Desp. locais',fB(des),''],['Spedizioniere doganale',fB(dsp),''],['Trasporto interno',fB(fri),'']];
+  const lines=[['FOB total (USD)',fU(fT),''],['CIF (USD)',fU(cifU),''],['CIF (BRL)',fB(cifB),'câmbio '+c.toFixed(2)],['Taxa portuária',fB(afrB),gv('s-afr')+'%'],['II',fB(iiB),gv('s-ii')+'%'],['IPI',fB(ipiB),gv('s-ipi')+'%'],['PIS',fB(pisB),gv('s-pis')+'%'],['COFINS',fB(cofB),gv('s-cof')+'%'],['ICMS',fB(icmB),gv('s-icm')+'%'],['Desp. portuárias',fB(des),''],['Despachante aduaneiro',fB(dsp),''],['Frete interno',fB(fri),'']];
   document.getElementById('sim-bk').innerHTML=lines.map(([l,v,n])=>`<div class="sl"><span style="color:#6b7280">${l}</span><span>${v}<span style="font-size:10px;color:#9ca3af;margin-left:5px">${n}</span></span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;font-weight:700;color:#0F4C81"><span>Total</span><span>${fB(tot)}</span></div><div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;font-weight:600;color:#E8621A"><span>Por unidade</span><span>${fB(uni)}</span></div>`;
   rPie([cifB,afrB,iiB,ipiB,pisB,cofB,icmB,des+dsp+fri]);
 }
@@ -625,7 +625,7 @@ function dC(id){if(CH[id]){CH[id].destroy();CH[id]=null;}}
 function expCSV(){
   if(!CP){alert('Consulte um produto primeiro.');return}
   const p=CP;
-  const rows=['NCM,Produto,FOB USD,CIF USD,Volume,Score',`${p.ncm},"${p.nome}",${p.fob},${p.cif},"${p.vol}",${p.score}`,'','Mes,FOB USD,CIF USD,Qtd,Kg,UF,Modal',...p.ops.map(o=>`${o.m},${o.fob},${o.cif},${o.qtd},${o.kg},${o.uf},${o.mod}`)];
+  const rows=['NC,Produto,FOB USD,CIF USD,Volume,Score',`${p.ncm},"${p.nome}",${p.fob},${p.cif},"${p.vol}",${p.score}`,'','Mes,FOB USD,CIF USD,Qtd,Kg,UF,Modal',...p.ops.map(o=>`${o.m},${o.fob},${o.cif},${o.qtd},${o.kg},${o.uf},${o.mod}`)];
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download=`importaITA_${p.ncm.replace(/\./g,'')}.csv`;a.click();
 }
 
