@@ -1020,32 +1020,28 @@ function initApp(){
 }
 
 async function fetchPTAX(){
-  const barItaEl = document.getElementById('ptax-bar');
-  try{
-    const hoje=new Date();
-    for(let d=0;d<5;d++){
-      const dt=new Date(hoje);dt.setDate(dt.getDate()-d);
-      const dd=String(dt.getDate()).padStart(2,'0'),mm=String(dt.getMonth()+1).padStart(2,'0'),yyyy=dt.getFullYear();
-      const url='https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda=%27EUR%27&@dataCotacao=%27'+mm+'-'+dd+'-'+yyyy+'%27&$top=1&$orderby=horaBoletim%20desc&$format=json&$select=cotacaoVenda';
-      const res=await fetch(url);if(!res.ok)continue;
-      const json=await res.json();
-      if(json?.value?.length){
-        const eurBrl=json.value[0].cotacaoVenda;
-        const usdEur=parseFloat((1/eurBrl*5.15).toFixed(4));
-        PTAX_SRC='real';
-        document.getElementById('cambio').value=usdEur.toFixed(4);
-        document.getElementById('s-cam').value=usdEur.toFixed(4);
-        barItaEl.innerHTML='<span style="color:#16a34a">&#10003;</span> <strong>Cambio EUR:</strong> 1 EUR = R$ '+eurBrl.toFixed(4)+' <span style="font-size:9px;font-weight:600;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">BANCA CENTRALE BR</span>';
-        barItaEl.style.cssText='background:#f0fdf4;border:0.5px solid #86efac;border-radius:6px;padding:7px 10px;font-size:11px;color:#166534;display:flex;align-items:center;gap:8px;margin-bottom:8px';
-        if(CP)load(CP);rFeat(C());return;
-      }
-    }
-    throw new Error('no rate');
-  }catch(e){
-    barItaEl.innerHTML='Taxa não disponível — usando fallback USD/EUR 0,92';
-    barItaEl.style.cssText='background:#fffbeb;border:0.5px solid #fcd34d;border-radius:6px;padding:7px 10px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;margin-bottom:8px';
+  const barEl = document.getElementById('ptax-bar');
+  const FALLBACK_EUR = 0.92;
+  if (!document.getElementById('cambio').value || document.getElementById('cambio').value == '0') {
+    document.getElementById('cambio').value = FALLBACK_EUR.toFixed(4);
+    if(document.getElementById('s-cam')) document.getElementById('s-cam').value = FALLBACK_EUR.toFixed(4);
   }
-  // end fetchPTAX
+  barEl.innerHTML = '<span class="spin"></span> Buscando câmbio EUR...';
+  try {
+    // Frankfurter API — gratuita, sem chave, sem CORS
+    const r = await fetch('https://api.frankfurter.dev/v2/rates?base=USD&quotes=EUR');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const eur = data.rates?.EUR || data[0]?.rates?.EUR;
+    if (!eur) throw new Error('sem dado EUR');
+    const v = parseFloat(eur.toFixed(4));
+    document.getElementById('cambio').value = v.toFixed(4);
+    if(document.getElementById('s-cam')) document.getElementById('s-cam').value = v.toFixed(4);
+    barEl.innerHTML = '<span style="color:#16a34a">✓</span> <strong>USD/EUR:</strong> ' + v.toFixed(4) + ' <span style="font-size:9px;font-weight:600;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">Frankfurter / ECB</span>';
+  } catch(e) {
+    console.warn('Câmbio EUR falhou:', e.message);
+    barEl.innerHTML = '<span style="color:#f59e0b">⚠</span> Taxa não disponível — usando fallback USD/EUR ' + FALLBACK_EUR;
+  }
 }
 
 function pg(id,el){
