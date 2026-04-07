@@ -667,7 +667,7 @@ async function onInputComAPI(v) {
     window._searchTimeout = setTimeout(async () => {
       box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Buscando "' + v2 + '"...</div>';
       box.style.display = '';
-      const resultados = await buscarNCMPorNome(v2);
+      const resultados = await buscarNCPorNome(v2);
       if (resultados && resultados.length) {
         box.innerHTML = resultados.map(r =>
           `<div class="si" onclick="loadFromAPI('${r.ncm}', '${(r.nome||'').replace(/'/g,"\\'")}')">
@@ -705,7 +705,7 @@ async function onInputComAPI(v) {
     window._st = setTimeout(async () => {
       box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Buscando...</div>';
       box.style.display = '';
-      const rs = await buscarHTSPorNome(v);
+      const rs = await buscarNCPorNome(v);
       if (rs.length) {
         box.innerHTML = rs.map(r =>
           `<div class="si" onclick="loadFromAPI('${r.ncm}', '${(r.nome||'').replace(/'/g,"\\'")}')">
@@ -739,7 +739,7 @@ async function doSearchComAPI() {
     return;
   }
 
-  const rs = await buscarHTSPorNome(v);
+  const rs = await buscarNCPorNome(v);
   if (rs.length === 1) {
     await loadFromAPI(rs[0].ncm, rs[0].nome);
   } else if (rs.length > 1) {
