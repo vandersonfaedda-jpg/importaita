@@ -206,7 +206,7 @@ tr:hover td{background:var(--surf2)}
   <div class="al al-info" id="dash-alert">Busque um produto. Ex: <strong>scolapiatti inox</strong></div>
   <div class="mg3">
     <div class="mc"><div class="mlbl">FOB médio / USD</div><div class="mval" id="d-fob-usd">—</div><div class="msub">por unidade</div></div>
-    <div class="mc"><div class="mlbl">FOB médio / BRL</div><div class="mval" id="d-fob-brl">—</div><div class="msub" id="d-cs">—</div></div>
+    <div class="mc"><div class="mlbl">FOB médio / EUR</div><div class="mval" id="d-fob-brl">—</div><div class="msub" id="d-cs">—</div></div>
     <div class="mc"><div class="mlbl">Preço / kg</div><div class="mval" id="d-pkg">—</div><div class="msub">USD/kg</div></div>
     <div class="mc"><div class="mlbl">Volume</div><div class="mval" id="d-vol">—</div><div class="msub">período</div></div>
     <div class="mc"><div class="mlbl">Confiança</div><div class="mval" id="d-sc">—</div><div class="cb"><div class="cf" id="d-cf" style="width:0%"></div></div></div>
@@ -1064,7 +1064,7 @@ function nac(p,c){const cf=p.cif*c,daz=cf*(p.dazio||0)/100,dpd=cf*(p.dpd||0.8)/1
 function load(p){
   CP=p;const c=C();
   document.getElementById('d-fob-usd').textContent=fU(p.fob)+'/un';
-  document.getElementById('d-fob-brl').textContent=fB(p.fob*c)+'/un';
+  document.getElementById('d-fob-brl').textContent='€ '+(p.fob*c).toFixed(2)+'/un';
   document.getElementById('d-pkg').textContent=fU(p.pkg)+'/kg';
   document.getElementById('d-vol').textContent=p.vol;
   document.getElementById('d-sc').textContent=p.score+'/100';
@@ -1257,7 +1257,7 @@ function rCharts(){
   CH['ch-fob']=new Chart(document.getElementById('ch-fob'),{type:'line',data:{labels:labs,datasets:[{label:'FOB USD',data:ops.map(o=>o.fob),borderColor:'#0F4C81',borderWidth:2,pointRadius:3,tension:0.3,fill:false},{label:'CIF USD',data:ops.map(o=>o.cif),borderColor:'#E8621A',borderWidth:2,pointRadius:2,tension:0.3,fill:false,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},autoSkip:true,maxRotation:45}},y:{ticks:{font:{size:10},callback:v=>'$'+v.toFixed(2)}}}}});
   const nacs=ops.map(o=>{const cb=o.cif*c,ii=cb*p.ii/100,ipi=(cb+ii)*p.ipi/100,ps=cb*p.pis/100,co=cb*p.cof/100,b=cb+ii+ipi+ps+co;return parseFloat((b+b*p.icms/(100-p.icms)+0.5).toFixed(2));});
   dC('ch-cmp');
-  CH['ch-cmp']=new Chart(document.getElementById('ch-cmp'),{type:'bar',data:{labels:labs,datasets:[{label:'FOB BRL',data:ops.map(o=>parseFloat((o.fob*c).toFixed(2))),backgroundColor:'#0F4C81',borderRadius:3,maxBarThickness:14},{label:'Nac.',data:nacs,backgroundColor:'#E8621A',borderRadius:3,maxBarThickness:14}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},autoSkip:true,maxRotation:45}},y:{ticks:{font:{size:10},callback:v=>'R$'+v.toFixed(0)}}}}});
+  CH['ch-cmp']=new Chart(document.getElementById('ch-cmp'),{type:'bar',data:{labels:labs,datasets:[{label:'FOB EUR',data:ops.map(o=>parseFloat((o.fob*c).toFixed(2))),backgroundColor:'#0F4C81',borderRadius:3,maxBarThickness:14},{label:'Nac.',data:nacs,backgroundColor:'#E8621A',borderRadius:3,maxBarThickness:14}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},autoSkip:true,maxRotation:45}},y:{ticks:{font:{size:10},callback:v=>'R$'+v.toFixed(0)}}}}});
   const mc={};ops.forEach(o=>{mc[o.mod]=(mc[o.mod]||0)+1});
   const mk=Object.keys(mc),mv=Object.values(mc),cols=['#0F4C81','#E8621A','#16a34a','#7c3aed'];
   dC('ch-mod');
