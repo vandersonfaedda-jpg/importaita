@@ -529,51 +529,34 @@ const C=()=>parseFloat(document.getElementById('cambio').value)||5.15;
 let apiCacheITA = {};
 
 async function buscarDadosViaClaudeAPI(hts, pais, periodo) {
-  const cacheKey = `ITA_${hts}_${periodo}`;
+  const cacheKey = `ITA_{hts}_${periodo}`;
   if (apiCacheITA[cacheKey]) return apiCacheITA[cacheKey];
 
-  showApiStatus('<span class="spin"></span> Buscando dados reais Itália/UE...', 'loading');
+  showApiStatus('<span class="spin"></span> Buscando dados via IA...', 'loading');
 
   try {
-    const prompt = `Você é especialista em comércio exterior Itália/UE.
-Forneça dados reais de importação do produto com código NC ${hts} importado da China para Itália/UE.
-
-Responda APENAS com JSON válido:
-{
-  "encontrado": true,
-  "hts": "${hts}",
-  "descricao": "descrição do produto em português",
-  "fobMedioUn": 0.00,
-  "fobMedioKg": 0.00,
-  "pesoMedioUn": 0.00,
-  "volumeAnual": "X milhões unidades/ano",
-  "numRegistros": 0,
-  "tendencia": 0.0,
-  "confianca": 72,
-  "impostos": {"ii": 0, "sec301": 0, "ieepa": 10, "mpf": 0.3464, "hmf": 0.125},
-  "historico": [
-    {"periodo": "2024", "fobKg": 0.00, "kgTotal": 0},
-    {"periodo": "2023", "fobKg": 0.00, "kgTotal": 0}
-  ],
-  "alertas": ["alertas regulatórios relevantes"],
-  "licencaPrevia": false,
-  "fonte": "UN Comtrade / estimativa IA"
-}`;
-
-    const response = await fetch('/api/search', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ tipo: 'codigo', query: hts, pais: 'ITA' }) });
+    const response = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tipo: 'codigo', query: hts, pais: 'ITA' })
+    });
 
     if (!response.ok) throw new Error(`API ${response.status}`);
     const data = await response.json();
+
     if (!data.ok || !data.data) throw new Error('sem dados');
     const json = data.data;
-    if (!json || (!json.encontrado && !json.nomeComercial && !json.descricao && !json.codigoFormatado)) throw new Error('nao encontrado');
+    if (!json || (!json.nomeComercial && !json.descricao && !json.codigoFormatado && !json.codigo)) {
+      throw new Error('produto nao encontrado');
+    }
+
     apiCacheITA[cacheKey] = json;
-    showApiStatus(`✓ Dados obtidos — ${json.fonte}`, 'ok');
+    showApiStatus(`✓ ${json.nomeComercial || json.codigoFormatado || hts} — ${json.fonte || 'Groq IA'}`, 'ok');
     return json;
 
   } catch(e) {
-    console.warn('API falhou:', e.message);
-    showApiStatus('Busca indisponível — usando dados estimados', 'warn');
+    console.warn('Busca IA falhou:', e.message);
+    showApiStatus('Busca indisponível — usando dados estimados locais', 'warn');
     return null;
   }
 }
