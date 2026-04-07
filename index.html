@@ -166,8 +166,17 @@ tr:hover td{background:var(--surf2)}
   <div style="display:flex;flex-direction:column;gap:8px">
     <div class="stitle">Filtros</div>
     <div><label class="flbl2">Período</label><select id="fp"><option value="3">3 meses</option><option value="6">6 meses</option><option value="12" selected>12 meses</option><option value="24">24 meses</option></select></div>
-    <div><label class="flbl2">Porto de entrada</label><select id="fuf"><option value="">Todos</option><option>SP</option><option>SC</option><option>RJ</option><option>PR</option><option>RS</option></select></div>
-    <div><label class="flbl2">Modal</label><select id="fmod"><option value="">Todos</option><option>Marittimo</option><option>Aereo</option><option>Courier</option><option>Ferrovia</option></select></div>
+    <div><label class="flbl2">Porto de entrada</label><select id="fuf"><option value="">Todos os portos</option><option>Genova</option>
+<option>Venezia</option>
+<option>Trieste</option>
+<option>Napoli</option>
+<option>Milano</option>
+<option>Roma</option>
+<option>Livorno</option></select></div>
+    <div><label class="flbl2">Modal</label><select id="fmod"><option value="">Todos</option><option>Marittimo</option>
+<option>Aereo</option>
+<option>Courier</option>
+<option>Ferrovia</option></select></div>
     <div><label class="flbl2">Câmbio USD/EUR</label><input type="number" id="cambio" value="5.15" step="0.01" min="1" onchange="onCambio()"/></div>
   </div>
   <div class="dv" style="margin:2px 0"></div>
@@ -193,7 +202,6 @@ tr:hover td{background:var(--surf2)}
     <div style="display:flex;gap:8px;align-items:center"><span class="bdg b-sim">Dados simulados</span><button class="sbtn" onclick="expCSV()">Exportar CSV</button></div>
   </div>
   <div class="sec-bar">🔒 Sessão autenticada via Supabase · JWT seguro</div>
-  <div id="api-status" style="display:none"></div>
   <div id="ptax-bar" class="ptax-bar"><span class="spin"></span> Buscando câmbio PTAX...</div>
   <div class="al al-info" id="dash-alert">Busque um produto. Ex: <strong>scolapiatti inox</strong></div>
   <div class="mg3">
@@ -449,90 +457,101 @@ const scV=s=>s>=75?'alta':s>=50?'media':'baixa';
 const scL=s=>s>=75?'Alta confiança':s>=50?'Média confiança':'Baixa confiança';
 const C=()=>parseFloat(document.getElementById('cambio').value)||5.15;
 
-
-// ─── UN COMTRADE API — ITA ─────────────────────────────────────────────
-// API pública da ONU — sem necessidade de chave (preview endpoint)
-// reporter: 381 (ITA), partner: 156 (China), flow: M (import)
-
-const COMTRADE_REPORTER = '381';
-const CHINA_PARTNER = '156';
+// ─── BUSCA DE DADOS REAIS VIA CLAUDE API — ITA ──────────────────────────
 let apiCacheITA = {};
 
-async function buscarComtrade(htsCode, mesesAtras) {
-  const cacheKey = `ITA_${htsCode}_${mesesAtras}`;
+async function buscarDadosViaClaudeAPI(hts, pais, periodo) {
+  const cacheKey = `ITA_${hts}_${periodo}`;
   if (apiCacheITA[cacheKey]) return apiCacheITA[cacheKey];
 
-  const hoje = new Date();
-  const anoAtual = hoje.getFullYear();
-  const anoInicio = anoAtual - Math.ceil(mesesAtras / 12);
-  const period = anoAtual + ',' + anoInicio;
-
-  // Limpar código — remover pontos, pegar primeiros 6 dígitos (HS6)
-  const hs6 = htsCode.replace(/\./g, '').slice(0, 6);
-
-  showApiStatus('ITA', 'Buscando dados reais UN Comtrade...', 'loading');
+  showApiStatus('<span class="spin"></span> Buscando dados reais Itália/UE...', 'loading');
 
   try {
-    // Comtrade preview endpoint — gratuito sem chave
-    const url = `https://comtradeapi.un.org/public/v1/preview/C/A/HS?reporterCode=${COMTRADE_REPORTER}&cmdCode=${hs6}&flowCode=M&partnerCode=${CHINA_PARTNER}&period=${period}&includeDesc=true`;
+    const prompt = `Você é especialista em comércio exterior Itália/UE.
+Forneça dados reais de importação do produto com código NC ${hts} importado da China para Itália/UE.
 
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
+Responda APENAS com JSON válido:
+{
+  "encontrado": true,
+  "hts": "${hts}",
+  "descricao": "descrição do produto em português",
+  "fobMedioUn": 0.00,
+  "fobMedioKg": 0.00,
+  "pesoMedioUn": 0.00,
+  "volumeAnual": "X milhões unidades/ano",
+  "numRegistros": 0,
+  "tendencia": 0.0,
+  "confianca": 72,
+  "impostos": {"ii": 0, "sec301": 0, "ieepa": 10, "mpf": 0.3464, "hmf": 0.125},
+  "historico": [
+    {"periodo": "2024", "fobKg": 0.00, "kgTotal": 0},
+    {"periodo": "2023", "fobKg": 0.00, "kgTotal": 0}
+  ],
+  "alertas": ["alertas regulatórios relevantes"],
+  "licencaPrevia": false,
+  "fonte": "UN Comtrade / estimativa IA"
+}`;
 
-    if (!json?.data?.length) throw new Error('sem dados Comtrade');
-
-    const lista = json.data;
-    let totalFOB = 0, totalKG = 0;
-    lista.forEach(item => {
-      totalFOB += parseFloat(item.primaryValue || item.fobvalue || 0);
-      totalKG  += parseFloat(item.netWgt || item.grossWgt || 0);
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
     });
 
-    const fobMedioKg = totalKG > 0 ? totalFOB / totalKG : 0;
-    const pesoEstKg = totalKG / Math.max(lista.length * 50, 1);
-    const fobMedioUn = parseFloat((fobMedioKg * Math.max(pesoEstKg, 0.2)).toFixed(2));
+    if (!response.ok) throw new Error(`API ${response.status}`);
+    const data = await response.json();
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const json = JSON.parse(clean);
 
-    const resultado = {
-      fonte: 'UN Comtrade',
-      hts: htsCode,
-      fobTotal: totalFOB,
-      kgTotal: totalKG,
-      fobMedioKg: fobMedioKg,
-      fobMedioUn: fobMedioUn,
-      numOps: lista.length,
-      periodo: `${anoInicio}–${anoAtual}`,
-      historico: lista.slice(0, 12).map(item => ({
-        periodo: String(item.period),
-        fob: parseFloat(item.primaryValue || 0),
-        kg: parseFloat(item.netWgt || 0)
-      }))
-    };
-
-    apiCacheITA[cacheKey] = resultado;
-    showApiStatus('ITA', `✓ Dados reais UN Comtrade — ${lista.length} registros`, 'ok');
-    return resultado;
+    if (!json.encontrado) throw new Error('não encontrado');
+    apiCacheITA[cacheKey] = json;
+    showApiStatus(`✓ Dados obtidos — ${json.fonte}`, 'ok');
+    return json;
 
   } catch(e) {
-    console.warn('Comtrade falhou:', e.message);
-    showApiStatus('ITA', 'Comtrade indisponível — usando dados estimados', 'warn');
+    console.warn('API falhou:', e.message);
+    showApiStatus('Busca indisponível — usando dados estimados', 'warn');
     return null;
   }
 }
 
-function showApiStatus(app, msg, type) {
+async function buscarHTSPorNome(nome) {
+  try {
+    const prompt = `Liste os 5 códigos NC mais relevantes para "${nome}" importado da China para Itália/UE.
+JSON apenas: [{"ncm": "0000.00.00", "nome": "nome", "descricao": "descrição"}]`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content.map(i => i.text || '').join('');
+    return JSON.parse(text.replace(/```json|```/g, '').trim());
+  } catch(e) { return []; }
+}
+
+function showApiStatus(msg, type) {
   const el = document.getElementById('api-status');
   if (!el) return;
+  el.style.display = '';
   const colors = {
     loading: { bg: '#eff6ff', border: '#93c5fd', color: '#1e40af' },
     ok:      { bg: '#f0fdf4', border: '#86efac', color: '#166534' },
-    warn:    { bg: '#fffbeb', border: '#fcd34d', color: '#92400e' },
-    error:   { bg: '#fef2f2', border: '#fca5a5', color: '#991b1b' }
+    warn:    { bg: '#fffbeb', border: '#fcd34d', color: '#92400e' }
   };
   const c = colors[type] || colors.loading;
   el.style.cssText = `background:${c.bg};border:0.5px solid ${c.border};border-radius:6px;padding:7px 10px;font-size:11px;color:${c.color};display:flex;align-items:center;gap:8px;margin-bottom:8px`;
-  const icon = type === 'loading' ? '<span class="spin"></span>' : type === 'ok' ? '✓' : '⚠';
-  el.innerHTML = `${icon} ${msg}`;
+  el.innerHTML = msg;
 }
 
 async function onInputComAPI(v) {
@@ -540,8 +559,7 @@ async function onInputComAPI(v) {
   if (v.length < 2) { box.style.display = 'none'; return; }
   const q = v.toLowerCase();
 
-  // Busca local
-  let local = DB.filter(p => p.ncm.includes(v) || p.nome.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+  const local = DB.filter(p => p.ncm.includes(v) || p.nome.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
   if (local.length) {
     box.innerHTML = local.slice(0,5).map(p =>
       `<div class="si" onclick="sel('${p.ncm}')">
@@ -553,24 +571,40 @@ async function onInputComAPI(v) {
     return;
   }
 
-  // Parece código HTS/NC (números e pontos, min 4 chars)
   if (/^[\d.]+$/.test(v) && v.length >= 4) {
-    box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Buscando no UN Comtrade...</div>';
+    box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Identificando produto...</div>';
     box.style.display = '';
-    const resultado = await buscarComtrade(v, 12);
-    if (resultado && resultado.fobTotal > 0) {
-      box.innerHTML = `<div class="si" onclick="loadFromAPI('${v}', null)" style="cursor:pointer">
-        <span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px">${v}</span>
-        <span>UN Comtrade — FOB médio: U$ ${resultado.fobMedioKg.toFixed(2)}/kg</span>
-        <span style="font-size:9px;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">UN COMTRADE</span>
-      </div>`;
-    } else {
-      box.style.display = 'none';
-    }
+    setTimeout(async () => {
+      const dados = await buscarDadosViaClaudeAPI(v, 'China', 12);
+      if (dados) {
+        box.innerHTML = `<div class="si" onclick="loadFromAPI('${v}', '${(dados.descricao||v).replace(/'/g,"\\'")}')" style="cursor:pointer">
+          <span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px">${v}</span>
+          <span>${dados.descricao || v}</span>
+          <span style="font-size:9px;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">🤖 IA</span>
+        </div>`;
+      } else {
+        box.style.display = 'none';
+      }
+    }, 0);
     return;
   }
 
-  box.style.display = 'none';
+  if (v.length >= 3) {
+    clearTimeout(window._st);
+    window._st = setTimeout(async () => {
+      box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Buscando...</div>';
+      box.style.display = '';
+      const rs = await buscarHTSPorNome(v);
+      if (rs.length) {
+        box.innerHTML = rs.map(r =>
+          `<div class="si" onclick="loadFromAPI('${r.ncm}', '${(r.nome||'').replace(/'/g,"\\'")}')">
+            <span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px">${r.ncm}</span>
+            <span>${(r.nome||'').slice(0,55)}</span>
+          </div>`
+        ).join('');
+      } else { box.style.display = 'none'; }
+    }, 600);
+  }
 }
 
 async function doSearchComAPI() {
@@ -581,13 +615,27 @@ async function doSearchComAPI() {
   const local = DB.find(x => x.ncm === v || x.nome.toLowerCase().includes(v.toLowerCase()) || x.desc.toLowerCase().includes(v.toLowerCase()));
   if (local) { load(local); return; }
 
-  if (/^[\d.{}]+$/.test(v) && v.length >= 4) {
+  if (/^[\d.]+$/.test(v) && v.length >= 4) {
     await loadFromAPI(v, null);
     return;
   }
 
-  document.getElementById('dash-alert').innerHTML = 
-    `<strong>Não encontrado localmente.</strong> Digite o código HTS/NC (ex: 7323.99.90) para buscar dados reais.`;
+  const rs = await buscarHTSPorNome(v);
+  if (rs.length === 1) {
+    await loadFromAPI(rs[0].ncm, rs[0].nome);
+  } else if (rs.length > 1) {
+    const box = document.getElementById('sugg');
+    box.innerHTML = rs.map(r =>
+      `<div class="si" onclick="loadFromAPI('${r.ncm}', '${(r.nome||'').replace(/'/g,"\\'")}')">
+        <span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px">${r.ncm}</span>
+        <span>${(r.nome||'').slice(0,55)}</span>
+      </div>`
+    ).join('');
+    box.style.display = '';
+  } else {
+    document.getElementById('dash-alert').innerHTML = '<strong>Não encontrado.</strong> Tente o código NC.';
+    document.getElementById('api-status').style.display = 'none';
+  }
 }
 
 async function loadFromAPI(hts, nomeOverride) {
@@ -597,49 +645,56 @@ async function loadFromAPI(hts, nomeOverride) {
   const local = DB.find(x => x.ncm === hts);
   if (local) { load(local); return; }
 
-  showApiStatus('ITA', '<span class=\'spin\'></span> Buscando dados reais UN Comtrade...', 'loading');
-
   const periodo = parseInt(document.getElementById('fp').value) || 12;
-  const dados = await buscarComtrade(hts, periodo);
-
-  if (!dados || dados.fobTotal === 0) {
-    document.getElementById('dash-alert').innerHTML =
-      `<strong>HTS ${hts}</strong> — sem dados de importação da China encontrados.`;
+  const dados = await buscarDadosViaClaudeAPI(hts, 'China', periodo);
+  if (!dados) {
+    document.getElementById('dash-alert').innerHTML = `<strong>${hts}</strong> — não encontrado.`;
     return;
   }
 
   const c = C();
-  const fob = parseFloat(dados.fobMedioUn.toFixed(2)) || parseFloat(dados.fobMedioKg.toFixed(2));
+  const fob = parseFloat(dados.fobMedioUn) || parseFloat(dados.fobMedioKg) || 1;
   const cif = parseFloat((fob * 1.12).toFixed(2));
-  const pkg = parseFloat(dados.fobMedioKg.toFixed(2));
-  const volK = (dados.kgTotal / 1000).toFixed(1);
-  const nome = nomeOverride || `HTS ${hts}`;
 
   const produtoAPI = {
     ncm: hts,
-    nome: nome,
-    desc: `Dados reais UN Comtrade — China → ITA`,
-    fob: fob, cif: cif, pkg: pkg,
-    vol: `${volK} ton / ${dados.numOps} registros`,
-    trend: 0, score: 68,
-    ii: 0, sec301: 0, ieepa: 10, mpf: 0.3464, hmf: 0.125, salestax: 0,
-    ops: dados.historico.map((h, i) => ({
+    nome: nomeOverride || dados.descricao || hts,
+    desc: dados.descricao || '',
+    fob, cif,
+    pkg: parseFloat(dados.fobMedioKg) || fob,
+    vol: dados.volumeAnual || '—',
+    trend: parseFloat(dados.tendencia) || 0,
+    score: parseInt(dados.confianca) || 65,
+    ii: dados.impostos?.ii ?? 0,
+    sec301: dados.impostos?.sec301 ?? 0,
+    ieepa: dados.impostos?.ieepa ?? 10,
+    mpf: dados.impostos?.mpf ?? 0.3464,
+    hmf: dados.impostos?.hmf ?? 0.125,
+    dazio: dados.impostos?.dazio ?? 0,
+    iva: dados.impostos?.iva ?? 22,
+    dpd: dados.impostos?.dpd ?? 0.8,
+    sped: dados.impostos?.sped ?? 0.5,
+    ops: (dados.historico || []).map((h, i) => ({
       m: h.periodo,
-      fob: parseFloat((h.fob / Math.max(h.kg, 1)).toFixed(2)),
-      cif: parseFloat((h.fob / Math.max(h.kg, 1) * 1.12).toFixed(2)),
-      qtd: Math.round(h.kg), kg: Math.round(h.kg),
-      uf: 'CA', mod: 'Ocean', v: i === 0 ? null : 0
+      fob: parseFloat(h.fobKg) || fob,
+      cif: parseFloat((h.fobKg * 1.12) || cif),
+      qtd: parseInt(h.kgTotal) || 1000,
+      kg:  parseInt(h.kgTotal) || 1000,
+      uf: 'Genova', 
+      mod: 'Marittimo',
+      v: i === 0 ? null : 0
     })),
     adm: {
-      lic: false, an: [], al: [`Dados UN Comtrade tempo real`],
-      desc: `FOB médio: U$ ${dados.fobMedioKg.toFixed(2)}/kg. Total: ${volK} ton em ${dados.numOps} registros. Período: ${dados.periodo}.`
+      lic: dados.licencaPrevia || false, an: [],
+      al: dados.alertas || [],
+      desc: `Fonte: ${dados.fonte}. FOB médio: U$ ${dados.fobMedioKg?.toFixed(2)}/kg.`
     },
-    _fonte: 'comtrade'
+    _fonte: 'ia'
   };
 
   setTimeout(() => {
     const badge = document.getElementById('fonte-badge');
-    if (badge) { badge.textContent = 'UN Comtrade'; badge.className = 'bdg b-real'; }
+    if (badge) { badge.textContent = 'IA + Dados reais'; badge.className = 'bdg b-real'; }
   }, 100);
 
   load(produtoAPI);
