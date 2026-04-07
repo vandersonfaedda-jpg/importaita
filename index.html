@@ -566,7 +566,7 @@ Responda APENAS com JSON válido:
     const data = await response.json();
     if (!data.ok || !data.data) throw new Error('sem dados');
     const json = data.data;
-    if (!json || (!json.encontrado && !json.nomeComercial && !json.nome)) throw new Error('nao encontrado');
+    if (!json || (!json.encontrado && !json.nomeComercial && !json.descricao && !json.codigoFormatado)) throw new Error('nao encontrado');
     apiCacheITA[cacheKey] = json;
     showApiStatus(`✓ Dados obtidos — ${json.fonte}`, 'ok');
     return json;
@@ -800,10 +800,10 @@ async function loadFromAPI(hts, nomeOverride) {
     trend: parseFloat(dados.tendencia) || 0,
     score: parseInt(dados.confianca) || 65,
     ii: dados.impostos?.ii ?? 0,
-    sec301: dados.impostos?.sec301 ?? 0,
-    ieepa: dados.impostos?.ieepa ?? 10,
-    mpf: dados.impostos?.mpf ?? 0.3464,
-    hmf: dados.impostos?.hmf ?? 0.125,
+    ipi: dados.impostos?.ipi ?? 0,
+    pis: dados.impostos?.pis ?? 0,
+    cof: dados.impostos?.cofins ?? 0,
+    icms: dados.impostos?.icms ?? 0,
     dazio: dados.impostos?.dazio ?? 0,
     iva: dados.impostos?.iva ?? 22,
     dpd: dados.impostos?.dpd ?? 0.8,
