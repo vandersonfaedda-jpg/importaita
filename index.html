@@ -158,26 +158,26 @@ tr:hover td{background:var(--surf2)}
 <aside class="side">
   <div>
     <div class="stitle">Busca</div>
-    <input id="qi" placeholder="Produto, código NC ou palavra-chave..." oninput="onInput(this.value)" autocomplete="off"/>
+    <input id="qi" placeholder="Produto, código NC ou palavra-chave..." oninput="onInputComAPI(this.value)" autocomplete="off"/>
     <div id="sugg" style="display:none" class="sugg"></div>
-    <button class="pbtn" onclick="doSearch()">Consultar</button>
+    <button class="pbtn" onclick="doSearchComAPI()">Consultar</button>
   </div>
   <div class="dv" style="margin:2px 0"></div>
   <div style="display:flex;flex-direction:column;gap:8px">
     <div class="stitle">Filtros</div>
     <div><label class="flbl2">Período</label><select id="fp"><option value="3">3 meses</option><option value="6">6 meses</option><option value="12" selected>12 meses</option><option value="24">24 meses</option></select></div>
     <div><label class="flbl2">Porto de entrada</label><select id="fuf"><option value="">Todos</option><option>SP</option><option>SC</option><option>RJ</option><option>PR</option><option>RS</option></select></div>
-    <div><label class="flbl2">Modal</label><select id="fmod"><option value="">Todos</option><option>Marítimo</option><option>Aéreo</option><option>Courier</option></select></div>
+    <div><label class="flbl2">Modal</label><select id="fmod"><option value="">Todos</option><option>Marittimo</option><option>Aereo</option><option>Courier</option><option>Ferrovia</option></select></div>
     <div><label class="flbl2">Câmbio USD/EUR</label><input type="number" id="cambio" value="5.15" step="0.01" min="1" onchange="onCambio()"/></div>
   </div>
   <div class="dv" style="margin:2px 0"></div>
   <div>
     <div class="stitle">Histórico</div>
     <div style="margin-top:4px">
-      <div class="hi" onclick="sel('7323.93.00')"><span class="hncm">7323.93.00</span><span style="font-size:11px">Scolapiatti inox</span></div>
-      <div class="hi" onclick="sel('8516.50.00')"><span class="hncm">8516.50.00</span><span style="font-size:11px">Forni microonde</span></div>
-      <div class="hi" onclick="sel('6204.62.31')"><span class="hncm">6204.62.31</span><span style="font-size:11px">Pantaloni donna</span></div>
-      <div class="hi" onclick="sel('8471.30.01')"><span class="hncm">8471.30.01</span><span style="font-size:11px">Computer portatili</span></div>
+      <div class="hi" onclick="sel('7323.93.00')"><span class="hncm">7323.93.00</span><span style="font-size:11px">Escorredor inox</span></div>
+      <div class="hi" onclick="sel('8516.50.00')"><span class="hncm">8516.50.00</span><span style="font-size:11px">Micro-ondas</span></div>
+      <div class="hi" onclick="sel('6204.62.31')"><span class="hncm">6204.62.31</span><span style="font-size:11px">Calças femininas</span></div>
+      <div class="hi" onclick="sel('8471.30.01')"><span class="hncm">8471.30.01</span><span style="font-size:11px">Notebooks</span></div>
     </div>
   </div>
   <div style="margin-top:auto;padding-top:10px;border-top:0.5px solid var(--bd)">
@@ -193,6 +193,7 @@ tr:hover td{background:var(--surf2)}
     <div style="display:flex;gap:8px;align-items:center"><span class="bdg b-sim">Dados simulados</span><button class="sbtn" onclick="expCSV()">Exportar CSV</button></div>
   </div>
   <div class="sec-bar">🔒 Sessão autenticada via Supabase · JWT seguro</div>
+  <div id="api-status" style="display:none"></div>
   <div id="ptax-bar" class="ptax-bar"><span class="spin"></span> Buscando câmbio PTAX...</div>
   <div class="al al-info" id="dash-alert">Busque um produto. Ex: <strong>scolapiatti inox</strong></div>
   <div class="mg3">
@@ -297,10 +298,10 @@ tr:hover td{background:var(--surf2)}
         <div class="stitle" style="margin-bottom:8px">Alíquotas e tarifas</div>
         <div class="mg2">
           <div><label class="flbl2">II (%)</label><input id="s-ii" type="number" value="0" step="0.5"/></div>
-          <div><label class="flbl2">IVA importação (%)</label><input id="s-ipi" type="number" value="22" step="0.5"/></div>
-          <div><label class="flbl2">Direitos aduaneiros (%)</label><input id="s-pis" type="number" value="0.8" step="0.1"/></div>
-          <div><label class="flbl2">Despesas bancárias (%)</label><input id="s-cof" type="number" value="0.5" step="0.1"/></div>
-          <div><label class="flbl2">IVA local (%)</label><input id="s-icm" type="number" value="22" step="0.5"/></div>
+          <div><label class="flbl2">IVA — base: CIF+dazio (%)</label><input id="s-ipi" type="number" value="22" step="0.5"/></div>
+          <div><label class="flbl2">DPD — despesas aduaneiras (%)</label><input id="s-pis" type="number" value="0.8" step="0.1"/></div>
+          <div><label class="flbl2">Spese bancarie (%)</label><input id="s-cof" type="number" value="0.5" step="0.1"/></div>
+          <div><label class="flbl2">Alíquota IVA adicional (%)</label><input id="s-icm" type="number" value="0" step="0.5"/></div>
           <div><label class="flbl2">Método de cálculo</label><select id="s-ict"><option value="dentro" selected>Por dentro</option><option value="fora">Exclusivo</option></select></div>
         </div>
       </div>
@@ -413,24 +414,30 @@ function showLogin(){ document.getElementById('reset-form').style.display='none'
 
 // ─── Dados Mock ───────────────────────────────────────────────────────────────
 const DB=[
-  {ncm:'7323.93.00',nome:'Scolapiatti in acciaio inox',desc:'Articoli per uso domestico in acciaio inossidabile',fob:2.85,cif:3.22,pkg:3.65,vol:'8.4M pz',trend:1.5,score:80,ii:0,ipi:22,pis:0.8,cof:0.5,icms:22,
-   ops:[{m:'Mar/25',fob:2.82,cif:3.18,qtd:720000,kg:568800,uf:'Genova',mod:'Marittimo',v:null},{m:'Feb/25',fob:2.85,cif:3.22,qtd:685000,kg:541150,uf:'Venezia',mod:'Marittimo',v:1.1},{m:'Gen/25',fob:2.88,cif:3.25,qtd:745000,kg:588550,uf:'Genova',mod:'Marittimo',v:1.1},{m:'Dic/24',fob:2.92,cif:3.30,qtd:620000,kg:489800,uf:'Trieste',mod:'Marittimo',v:1.4},{m:'Nov/24',fob:2.89,cif:3.26,qtd:710000,kg:560900,uf:'Genova',mod:'Marittimo',v:-1.0},{m:'Ott/24',fob:2.86,cif:3.23,qtd:695000,kg:549050,uf:'Venezia',mod:'Marittimo',v:-1.0}],
-   adm:{lic:false,an:[],al:['Dazi antidumping UE possibili su acciaio cinese','REACH compliance per materiali a contatto alimentare'],desc:'Importazione libera nella UE. Dazi MFN 0% acciaio cucina. Verificare misure antidumping specifiche.'}},
-  {ncm:'8516.50.00',nome:'Forni a microonde',desc:'Forni a microonde per uso domestico',fob:38.50,cif:42.80,pkg:12.40,vol:'3.2M pz',trend:2.8,score:83,ii:2,ipi:22,pis:0.8,cof:0.5,icms:22,
-   ops:[{m:'Mar/25',fob:38.20,cif:42.46,qtd:268000,kg:3323200,uf:'Genova',mod:'Marittimo',v:null},{m:'Feb/25',fob:38.50,cif:42.80,qtd:245000,kg:3038000,uf:'Venezia',mod:'Marittimo',v:0.8},{m:'Gen/25',fob:39.20,cif:43.58,qtd:282000,kg:3496800,uf:'Trieste',mod:'Marittimo',v:1.8},{m:'Dic/24',fob:38.80,cif:43.12,qtd:298000,kg:3695200,uf:'Genova',mod:'Marittimo',v:-1.0},{m:'Nov/24',fob:38.40,cif:42.68,qtd:275000,kg:3410000,uf:'Venezia',mod:'Marittimo',v:-1.0}],
-   adm:{lic:false,an:['Certificazione CE obbligatoria','Direttiva EMC 2014/30/UE','Direttiva bassa tensione 2014/35/UE'],al:['Marcatura CE obbligatoria — senza CE il prodotto e bloccato','Regolamento Ecodesign per efficienza energetica'],desc:'Certificazione CE obbligatoria. Dazio MFN 2%. Direttive EMC e bassa tensione applicabili. Conformita Ecodesign richiesta.'}},
-  {ncm:'6302.60.00',nome:'Tessili da cucina e strofinacci',desc:'Biancheria da cucina e strofinacci in cotone',fob:1.45,cif:1.68,pkg:8.20,vol:'52.1M pz',trend:-0.8,score:76,ii:12,ipi:22,pis:0.8,cof:0.5,icms:22,
-   ops:[{m:'Mar/25',fob:1.42,cif:1.64,qtd:4250000,kg:519500,uf:'Napoli',mod:'Marittimo',v:null},{m:'Feb/25',fob:1.45,cif:1.68,qtd:3980000,kg:486556,uf:'Genova',mod:'Marittimo',v:2.1},{m:'Gen/25',fob:1.48,cif:1.71,qtd:4520000,kg:552444,uf:'Napoli',mod:'Marittimo',v:2.1},{m:'Dic/24',fob:1.52,cif:1.76,qtd:5200000,kg:635556,uf:'Genova',mod:'Marittimo',v:2.7}],
-   adm:{lic:false,an:[],al:['Dazio MFN 12% — tessili cotone da Cina','Etichettatura composizione fibre obbligatoria Reg 1007/2011'],desc:'Soggetto a dazio MFN del 12%. Etichettatura composizione fibre obbligatoria secondo Regolamento UE 1007/2011.'}},
-  {ncm:'6204.62.31',nome:'Pantaloni donna cotone',desc:'Pantaloni da donna in cotone — lavorati a maglia',fob:5.20,cif:5.85,pkg:22.50,vol:'18.7M pz',trend:1.2,score:71,ii:12,ipi:22,pis:0.8,cof:0.5,icms:22,
-   ops:[{m:'Mar/25',fob:5.15,cif:5.79,qtd:1520000,kg:67556,uf:'Milano',mod:'Aereo',v:null},{m:'Feb/25',fob:5.20,cif:5.85,qtd:1380000,kg:61333,uf:'Roma',mod:'Aereo',v:1.0},{m:'Gen/25',fob:5.25,cif:5.91,qtd:1650000,kg:73333,uf:'Milano',mod:'Aereo',v:1.0}],
-   adm:{lic:false,an:['Etichettatura composizione fibre Reg 1007/2011'],al:['Dazio MFN 12% abbigliamento cotone','Indicazione paese di origine obbligatoria'],desc:'Dazio MFN 12%. Etichettatura composizione fibre e istruzioni lavaggio obbligatorie. Paese di origine deve essere indicato.'}},
-  {ncm:'8471.30.01',nome:'Computer portatili',desc:'Macchine per elaborazione automatica dati portatili',fob:295.00,cif:310.50,pkg:88.00,vol:'4.8M pz',trend:4.1,score:89,ii:0,ipi:22,pis:0.8,cof:0.5,icms:22,
-   ops:[{m:'Mar/25',fob:292.00,cif:307.30,qtd:402000,kg:35376,uf:'Milano',mod:'Aereo',v:null},{m:'Feb/25',fob:296.00,cif:311.51,qtd:368000,kg:32384,uf:'Roma',mod:'Aereo',v:1.4},{m:'Gen/25',fob:298.00,cif:313.52,qtd:425000,kg:37400,uf:'Milano',mod:'Aereo',v:0.7}],
-   adm:{lic:false,an:['Certificazione CE obbligatoria','Direttiva RoHS 2011/65/UE'],desc:'Dazio 0% accordo ITA. Certificazione CE obbligatoria. Conformita direttiva RoHS obbligatoria.'}},
-  {ncm:'3304.99.00',nome:'Cosmetici e cura della pelle',desc:'Preparazioni cosmetiche per la cura della pelle',fob:2.10,cif:2.45,pkg:14.80,vol:'22.4M pz',trend:3.8,score:74,ii:6.5,ipi:22,pis:0.8,cof:0.5,icms:22,
-   ops:[{m:'Mar/25',fob:2.08,cif:2.42,qtd:1850000,kg:125000,uf:'Milano',mod:'Aereo',v:null},{m:'Feb/25',fob:2.10,cif:2.45,qtd:1720000,kg:116216,uf:'Roma',mod:'Aereo',v:1.0},{m:'Gen/25',fob:2.14,cif:2.49,qtd:1980000,kg:133784,uf:'Milano',mod:'Aereo',v:1.9}],
-   adm:{lic:false,an:['Regolamento cosmetici UE CE 1223/2009','Notifica CPNP obbligatoria'],al:['Notifica obbligatoria nel Cosmetic Products Notification Portal','Lista INCI ingredienti obbligatoria'],desc:'Regolamento CE 1223/2009 applicabile. Notifica CPNP obbligatoria prima della immissione sul mercato. Lista INCI obbligatoria.'}}
+  {ncm:'7323.93.00',nome:'Scolapiatti em aço inoxidável',cn:'7323930000',desc:'Artigos de uso doméstico em aço inoxidável',fob:2.85,cif:3.22,pkg:3.65,vol:'8.4M peças/ano',trend:1.5,score:80,
+   dazio:0,iva:22,dpd:0.8,sped:0.5,
+   ops:[{m:'Mar/25',fob:2.82,cif:3.18,qtd:720000,kg:568800,uf:'Genova',mod:'Marittimo',v:null},{m:'Fev/25',fob:2.85,cif:3.22,qtd:685000,kg:541150,uf:'Venezia',mod:'Marittimo',v:1.1},{m:'Jan/25',fob:2.88,cif:3.25,qtd:745000,kg:588550,uf:'Genova',mod:'Marittimo',v:1.1},{m:'Dic/24',fob:2.92,cif:3.30,qtd:620000,kg:489800,uf:'Trieste',mod:'Marittimo',v:1.4},{m:'Nov/24',fob:2.89,cif:3.26,qtd:710000,kg:560900,uf:'Genova',mod:'Marittimo',v:-1.0},{m:'Ott/24',fob:2.86,cif:3.23,qtd:695000,kg:549050,uf:'Venezia',mod:'Marittimo',v:-1.0}],
+   adm:{lic:false,an:[],al:['Dazio MFN: 0% — aço inox utensílios domésticos','IVA: 22% sobre (CIF + dazio)','REACH compliance para materiais em contato com alimentos','Possível antidumping UE em produtos de aço chinês'],desc:'Base de cálculo: valor CIF (obrigatório na UE). Dazio 0%. IVA 22% calculado sobre (CIF + dazio + DPD). Diretiva REACH aplicável. Verificar medidas antidumping UE para aço chinês.'}},
+  {ncm:'8516.50.00',nome:'Micro-ondas domésticos',cn:'8516500000',desc:'Fornos de micro-ondas para uso doméstico',fob:38.50,cif:42.80,pkg:12.40,vol:'3.2M peças/ano',trend:2.8,score:83,
+   dazio:2,iva:22,dpd:0.8,sped:0.5,
+   ops:[{m:'Mar/25',fob:38.20,cif:42.46,qtd:268000,kg:3323200,uf:'Genova',mod:'Marittimo',v:null},{m:'Fev/25',fob:38.50,cif:42.80,qtd:245000,kg:3038000,uf:'Venezia',mod:'Marittimo',v:0.8},{m:'Jan/25',fob:39.20,cif:43.58,qtd:282000,kg:3496800,uf:'Trieste',mod:'Marittimo',v:1.8},{m:'Dic/24',fob:38.80,cif:43.12,qtd:298000,kg:3695200,uf:'Genova',mod:'Marittimo',v:-1.0}],
+   adm:{lic:false,an:['Certificazione CE obbligatoria','Direttiva EMC 2014/30/UE','Direttiva bassa tensione 2014/35/UE'],al:['Dazio MFN: 2% sobre CIF','IVA: 22% sobre (CIF + dazio + DPD)','Marcatura CE obrigatória — produto bloqueado sem CE','Ecodesign: eficiência energética obrigatória'],desc:'Base de cálculo: valor CIF. Dazio 2%. IVA 22% sobre base tributável = CIF + dazio + DPD. Certificação CE obrigatória. Diretivas EMC e baixa tensão aplicáveis. Conformidade Ecodesign exigida.'}},
+  {ncm:'6302.60.00',nome:'Têxteis de cozinha e panos de prato',cn:'6302600000',desc:'Roupa de cozinha e panos de limpeza em algodão',fob:1.45,cif:1.68,pkg:8.20,vol:'52.1M peças/ano',trend:-0.8,score:76,
+   dazio:12,iva:22,dpd:0.8,sped:0.5,
+   ops:[{m:'Mar/25',fob:1.42,cif:1.64,qtd:4250000,kg:519500,uf:'Napoli',mod:'Marittimo',v:null},{m:'Fev/25',fob:1.45,cif:1.68,qtd:3980000,kg:486556,uf:'Genova',mod:'Marittimo',v:2.1},{m:'Jan/25',fob:1.48,cif:1.71,qtd:4520000,kg:552444,uf:'Napoli',mod:'Marittimo',v:2.1},{m:'Dic/24',fob:1.52,cif:1.76,qtd:5200000,kg:635556,uf:'Genova',mod:'Marittimo',v:2.7}],
+   adm:{lic:false,an:[],al:['Dazio MFN: 12% — têxteis algodão da China','IVA: 22% sobre (CIF + dazio + DPD)','Etiquetagem composição fibras obrigatória Reg 1007/2011','Monitoramento importação têxtil UE aplicável'],desc:'Base de cálculo: valor CIF. Dazio 12%. IVA 22% calculado sobre base tributável. Etiquetagem composição fibras obrigatória segundo Regulamento UE 1007/2011. Indicação país de origem obrigatória.'}},
+  {ncm:'6204.62.31',nome:'Calças femininas de algodão',cn:'6204623100',desc:'Calças femininas de algodão — malha',fob:5.20,cif:5.85,pkg:22.50,vol:'18.7M peças/ano',trend:1.2,score:71,
+   dazio:12,iva:22,dpd:0.8,sped:0.5,
+   ops:[{m:'Mar/25',fob:5.15,cif:5.79,qtd:1520000,kg:67556,uf:'Milano',mod:'Aereo',v:null},{m:'Fev/25',fob:5.20,cif:5.85,qtd:1380000,kg:61333,uf:'Roma',mod:'Aereo',v:1.0},{m:'Jan/25',fob:5.25,cif:5.91,qtd:1650000,kg:73333,uf:'Milano',mod:'Aereo',v:1.0}],
+   adm:{lic:false,an:['Etiquetagem composição fibras Reg 1007/2011'],al:['Dazio MFN: 12% — vestuário algodão','IVA: 22% sobre base tributável','Indicação país de origem obrigatória no produto','Sistema monitoramento têxtil UE ativo'],desc:'Base de cálculo: valor CIF. Dazio 12%. IVA 22% sobre (CIF + dazio + DPD). Etiquetagem composição fibras e instruções lavagem obrigatórias. País de origem deve constar no produto.'}},
+  {ncm:'8471.30.01',nome:'Notebooks e computadores portáteis',cn:'8471300100',desc:'Máquinas para processamento automático de dados portáteis',fob:295.00,cif:310.50,pkg:88.00,vol:'4.8M peças/ano',trend:4.1,score:89,
+   dazio:0,iva:22,dpd:0.8,sped:0.5,
+   ops:[{m:'Mar/25',fob:292.00,cif:307.30,qtd:402000,kg:35376,uf:'Milano',mod:'Aereo',v:null},{m:'Fev/25',fob:296.00,cif:311.51,qtd:368000,kg:32384,uf:'Roma',mod:'Aereo',v:1.4},{m:'Jan/25',fob:298.00,cif:313.52,qtd:425000,kg:37400,uf:'Milano',mod:'Aereo',v:0.7}],
+   adm:{lic:false,an:['Certificazione CE obbligatoria','Direttiva RoHS 2011/65/UE','Registrazione RAEE obbligatoria'],al:['Dazio: 0% acordo ITA (Information Technology Agreement)','IVA: 22% sobre (CIF + dazio + DPD)','CE obbligatoria — sem CE produto bloqueado na alfândega','RoHS compliance: substâncias perigosas limitadas'],desc:'Base de cálculo: valor CIF. Dazio 0% acordo ITA. IVA 22% sobre base tributável. Certificação CE obrigatória. Conformidade diretiva RoHS obrigatória. Registro RAEE obrigatório.'}},
+  {ncm:'3304.99.00',nome:'Cosméticos e cuidados com a pele',cn:'3304990000',desc:'Preparações cosméticas para cuidados com a pele',fob:2.10,cif:2.45,pkg:14.80,vol:'22.4M peças/ano',trend:3.8,score:74,
+   dazio:6.5,iva:22,dpd:0.8,sped:0.5,
+   ops:[{m:'Mar/25',fob:2.08,cif:2.42,qtd:1850000,kg:125000,uf:'Milano',mod:'Aereo',v:null},{m:'Fev/25',fob:2.10,cif:2.45,qtd:1720000,kg:116216,uf:'Roma',mod:'Aereo',v:1.0},{m:'Jan/25',fob:2.14,cif:2.49,qtd:1980000,kg:133784,uf:'Milano',mod:'Aereo',v:1.9}],
+   adm:{lic:false,an:['Regolamento cosmetici UE CE 1223/2009','Notifica CPNP obbligatoria prima do lançamento'],al:['Dazio MFN: 6.5% sobre CIF','IVA: 22% sobre (CIF + dazio + DPD)','CPNP: notificação obrigatória no portal EU antes de venda','Lista INCI ingredientes obrigatória — mais de 1300 substâncias proibidas na UE'],desc:'Base de cálculo: valor CIF. Dazio 6.5%. IVA 22% sobre base tributável. Regulamento CE 1223/2009 aplicável. Notificação CPNP obrigatória antes da comercialização. Pessoa responsável com sede UE exigida.'}}
 ];
 
 let CP=null,CH={},PTAX_SRC='fallback';
@@ -442,10 +449,206 @@ const scV=s=>s>=75?'alta':s>=50?'media':'baixa';
 const scL=s=>s>=75?'Alta confiança':s>=50?'Média confiança':'Baixa confiança';
 const C=()=>parseFloat(document.getElementById('cambio').value)||5.15;
 
+
+// ─── UN COMTRADE API — ITA ─────────────────────────────────────────────
+// API pública da ONU — sem necessidade de chave (preview endpoint)
+// reporter: 381 (ITA), partner: 156 (China), flow: M (import)
+
+const COMTRADE_REPORTER = '381';
+const CHINA_PARTNER = '156';
+let apiCacheITA = {};
+
+async function buscarComtrade(htsCode, mesesAtras) {
+  const cacheKey = `ITA_${htsCode}_${mesesAtras}`;
+  if (apiCacheITA[cacheKey]) return apiCacheITA[cacheKey];
+
+  const hoje = new Date();
+  const anoAtual = hoje.getFullYear();
+  const anoInicio = anoAtual - Math.ceil(mesesAtras / 12);
+  const period = anoAtual + ',' + anoInicio;
+
+  // Limpar código — remover pontos, pegar primeiros 6 dígitos (HS6)
+  const hs6 = htsCode.replace(/\./g, '').slice(0, 6);
+
+  showApiStatus('ITA', 'Buscando dados reais UN Comtrade...', 'loading');
+
+  try {
+    // Comtrade preview endpoint — gratuito sem chave
+    const url = `https://comtradeapi.un.org/public/v1/preview/C/A/HS?reporterCode=${COMTRADE_REPORTER}&cmdCode=${hs6}&flowCode=M&partnerCode=${CHINA_PARTNER}&period=${period}&includeDesc=true`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    if (!json?.data?.length) throw new Error('sem dados Comtrade');
+
+    const lista = json.data;
+    let totalFOB = 0, totalKG = 0;
+    lista.forEach(item => {
+      totalFOB += parseFloat(item.primaryValue || item.fobvalue || 0);
+      totalKG  += parseFloat(item.netWgt || item.grossWgt || 0);
+    });
+
+    const fobMedioKg = totalKG > 0 ? totalFOB / totalKG : 0;
+    const pesoEstKg = totalKG / Math.max(lista.length * 50, 1);
+    const fobMedioUn = parseFloat((fobMedioKg * Math.max(pesoEstKg, 0.2)).toFixed(2));
+
+    const resultado = {
+      fonte: 'UN Comtrade',
+      hts: htsCode,
+      fobTotal: totalFOB,
+      kgTotal: totalKG,
+      fobMedioKg: fobMedioKg,
+      fobMedioUn: fobMedioUn,
+      numOps: lista.length,
+      periodo: `${anoInicio}–${anoAtual}`,
+      historico: lista.slice(0, 12).map(item => ({
+        periodo: String(item.period),
+        fob: parseFloat(item.primaryValue || 0),
+        kg: parseFloat(item.netWgt || 0)
+      }))
+    };
+
+    apiCacheITA[cacheKey] = resultado;
+    showApiStatus('ITA', `✓ Dados reais UN Comtrade — ${lista.length} registros`, 'ok');
+    return resultado;
+
+  } catch(e) {
+    console.warn('Comtrade falhou:', e.message);
+    showApiStatus('ITA', 'Comtrade indisponível — usando dados estimados', 'warn');
+    return null;
+  }
+}
+
+function showApiStatus(app, msg, type) {
+  const el = document.getElementById('api-status');
+  if (!el) return;
+  const colors = {
+    loading: { bg: '#eff6ff', border: '#93c5fd', color: '#1e40af' },
+    ok:      { bg: '#f0fdf4', border: '#86efac', color: '#166534' },
+    warn:    { bg: '#fffbeb', border: '#fcd34d', color: '#92400e' },
+    error:   { bg: '#fef2f2', border: '#fca5a5', color: '#991b1b' }
+  };
+  const c = colors[type] || colors.loading;
+  el.style.cssText = `background:${c.bg};border:0.5px solid ${c.border};border-radius:6px;padding:7px 10px;font-size:11px;color:${c.color};display:flex;align-items:center;gap:8px;margin-bottom:8px`;
+  const icon = type === 'loading' ? '<span class="spin"></span>' : type === 'ok' ? '✓' : '⚠';
+  el.innerHTML = `${icon} ${msg}`;
+}
+
+async function onInputComAPI(v) {
+  const box = document.getElementById('sugg');
+  if (v.length < 2) { box.style.display = 'none'; return; }
+  const q = v.toLowerCase();
+
+  // Busca local
+  let local = DB.filter(p => p.ncm.includes(v) || p.nome.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+  if (local.length) {
+    box.innerHTML = local.slice(0,5).map(p =>
+      `<div class="si" onclick="sel('${p.ncm}')">
+        <span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px">${p.ncm}</span>
+        <span>${p.nome}</span>
+      </div>`
+    ).join('');
+    box.style.display = '';
+    return;
+  }
+
+  // Parece código HTS/NC (números e pontos, min 4 chars)
+  if (/^[\d.]+$/.test(v) && v.length >= 4) {
+    box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Buscando no UN Comtrade...</div>';
+    box.style.display = '';
+    const resultado = await buscarComtrade(v, 12);
+    if (resultado && resultado.fobTotal > 0) {
+      box.innerHTML = `<div class="si" onclick="loadFromAPI('${v}', null)" style="cursor:pointer">
+        <span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px">${v}</span>
+        <span>UN Comtrade — FOB médio: U$ ${resultado.fobMedioKg.toFixed(2)}/kg</span>
+        <span style="font-size:9px;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">UN COMTRADE</span>
+      </div>`;
+    } else {
+      box.style.display = 'none';
+    }
+    return;
+  }
+
+  box.style.display = 'none';
+}
+
+async function doSearchComAPI() {
+  const v = document.getElementById('qi').value.trim();
+  if (!v) return;
+  document.getElementById('sugg').style.display = 'none';
+
+  const local = DB.find(x => x.ncm === v || x.nome.toLowerCase().includes(v.toLowerCase()) || x.desc.toLowerCase().includes(v.toLowerCase()));
+  if (local) { load(local); return; }
+
+  if (/^[\d.{}]+$/.test(v) && v.length >= 4) {
+    await loadFromAPI(v, null);
+    return;
+  }
+
+  document.getElementById('dash-alert').innerHTML = 
+    `<strong>Não encontrado localmente.</strong> Digite o código HTS/NC (ex: 7323.99.90) para buscar dados reais.`;
+}
+
+async function loadFromAPI(hts, nomeOverride) {
+  document.getElementById('sugg').style.display = 'none';
+  document.getElementById('qi').value = nomeOverride || hts;
+
+  const local = DB.find(x => x.ncm === hts);
+  if (local) { load(local); return; }
+
+  showApiStatus('ITA', '<span class=\'spin\'></span> Buscando dados reais UN Comtrade...', 'loading');
+
+  const periodo = parseInt(document.getElementById('fp').value) || 12;
+  const dados = await buscarComtrade(hts, periodo);
+
+  if (!dados || dados.fobTotal === 0) {
+    document.getElementById('dash-alert').innerHTML =
+      `<strong>HTS ${hts}</strong> — sem dados de importação da China encontrados.`;
+    return;
+  }
+
+  const c = C();
+  const fob = parseFloat(dados.fobMedioUn.toFixed(2)) || parseFloat(dados.fobMedioKg.toFixed(2));
+  const cif = parseFloat((fob * 1.12).toFixed(2));
+  const pkg = parseFloat(dados.fobMedioKg.toFixed(2));
+  const volK = (dados.kgTotal / 1000).toFixed(1);
+  const nome = nomeOverride || `HTS ${hts}`;
+
+  const produtoAPI = {
+    ncm: hts,
+    nome: nome,
+    desc: `Dados reais UN Comtrade — China → ITA`,
+    fob: fob, cif: cif, pkg: pkg,
+    vol: `${volK} ton / ${dados.numOps} registros`,
+    trend: 0, score: 68,
+    ii: 0, sec301: 0, ieepa: 10, mpf: 0.3464, hmf: 0.125, salestax: 0,
+    ops: dados.historico.map((h, i) => ({
+      m: h.periodo,
+      fob: parseFloat((h.fob / Math.max(h.kg, 1)).toFixed(2)),
+      cif: parseFloat((h.fob / Math.max(h.kg, 1) * 1.12).toFixed(2)),
+      qtd: Math.round(h.kg), kg: Math.round(h.kg),
+      uf: 'CA', mod: 'Ocean', v: i === 0 ? null : 0
+    })),
+    adm: {
+      lic: false, an: [], al: [`Dados UN Comtrade tempo real`],
+      desc: `FOB médio: U$ ${dados.fobMedioKg.toFixed(2)}/kg. Total: ${volK} ton em ${dados.numOps} registros. Período: ${dados.periodo}.`
+    },
+    _fonte: 'comtrade'
+  };
+
+  setTimeout(() => {
+    const badge = document.getElementById('fonte-badge');
+    if (badge) { badge.textContent = 'UN Comtrade'; badge.className = 'bdg b-real'; }
+  }, 100);
+
+  load(produtoAPI);
+}
+
 function initApp(){ rFeat(C()); calcSim(); fetchPTAX(); }
 
 async function fetchPTAX(){
-  const barEl = document.getElementById('ptax-bar');
+  const barItaEl = document.getElementById('ptax-bar');
   try{
     const hoje=new Date();
     for(let d=0;d<5;d++){
@@ -460,15 +663,15 @@ async function fetchPTAX(){
         PTAX_SRC='real';
         document.getElementById('cambio').value=usdEur.toFixed(4);
         document.getElementById('s-cam').value=usdEur.toFixed(4);
-        barEl.innerHTML='<span style="color:#16a34a">&#10003;</span> <strong>Cambio EUR:</strong> 1 EUR = R$ '+eurBrl.toFixed(4)+' <span style="font-size:9px;font-weight:600;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">BANCA CENTRALE BR</span>';
-        barEl.style.cssText='background:#f0fdf4;border:0.5px solid #86efac;border-radius:6px;padding:7px 10px;font-size:11px;color:#166534;display:flex;align-items:center;gap:8px;margin-bottom:8px';
+        barItaEl.innerHTML='<span style="color:#16a34a">&#10003;</span> <strong>Cambio EUR:</strong> 1 EUR = R$ '+eurBrl.toFixed(4)+' <span style="font-size:9px;font-weight:600;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">BANCA CENTRALE BR</span>';
+        barItaEl.style.cssText='background:#f0fdf4;border:0.5px solid #86efac;border-radius:6px;padding:7px 10px;font-size:11px;color:#166534;display:flex;align-items:center;gap:8px;margin-bottom:8px';
         if(CP)load(CP);rFeat(C());return;
       }
     }
     throw new Error('no rate');
   }catch(e){
-    barEl.innerHTML='Taxa não disponível — usando fallback USD/EUR 0,92';
-    barEl.style.cssText='background:#fffbeb;border:0.5px solid #fcd34d;border-radius:6px;padding:7px 10px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;margin-bottom:8px';
+    barItaEl.innerHTML='Taxa não disponível — usando fallback USD/EUR 0,92';
+    barItaEl.style.cssText='background:#fffbeb;border:0.5px solid #fcd34d;border-radius:6px;padding:7px 10px;font-size:11px;color:#92400e;display:flex;align-items:center;gap:8px;margin-bottom:8px';
   }
   // end fetchPTAX
 }
@@ -485,7 +688,7 @@ function onInput(v){
   const box=document.getElementById('sugg');
   if(v.length<2){box.style.display='none';return}
   const q=v.toLowerCase();
-  const m=DB.filter(p=>p.ncm.includes(v)||p.nome.toLowerCase().includes(q));
+  const m=DB.filter(p=>p.ncm.includes(v)||p.nome.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q));
   if(!m.length){box.style.display='none';return}
   box.innerHTML=m.slice(0,5).map(p=>`<div class="si" onclick="sel('${p.ncm}')"><span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px;flex-shrink:0">${p.ncm}</span><span>${p.nome}</span></div>`).join('');
   box.style.display='';
@@ -493,7 +696,7 @@ function onInput(v){
 
 function doSearch(){
   const v=document.getElementById('qi').value.trim();if(!v)return;
-  const p=DB.find(x=>x.ncm===v||x.nome.toLowerCase().includes(v.toLowerCase()));
+  const p=DB.find(x=>x.ncm===v||x.nome.toLowerCase().includes(v.toLowerCase())||x.desc.toLowerCase().includes(v.toLowerCase()));
   p?load(p):(document.getElementById('dash-alert').innerHTML='<strong>Não encontrado.</strong>');
   document.getElementById('sugg').style.display='none';
 }
@@ -503,7 +706,7 @@ function sel(ncm){
   document.getElementById('qi').value=p.nome;document.getElementById('sugg').style.display='none';load(p);
 }
 
-function nac(p,c){const cf=p.cif*c,ii=cf*p.ii/100,ipi=(cf+ii)*p.ipi/100,ps=cf*p.pis/100,co=cf*p.cof/100,b=cf+ii+ipi+ps+co;return b+b*p.icms/(100-p.icms)+0.5;}
+function nac(p,c){const cf=p.cif*c,daz=cf*(p.dazio||0)/100,dpd=cf*(p.dpd||0.8)/100,ivaBase=cf+daz+dpd,iva=ivaBase*(p.iva||22)/100,sped=cf*(p.sped||0.5)/100;return cf+daz+iva+dpd+sped+0.5;}
 
 function load(p){
   CP=p;const c=C();
@@ -566,28 +769,41 @@ function rt(id,el){
 function onCambio(){if(CP)load(CP);else rFeat(C());}
 function preSim(p,c){
   document.getElementById('s-prod').value=p.nome;document.getElementById('s-ncm').value=p.ncm;
-  document.getElementById('s-fob').value=p.fob;document.getElementById('s-cam').value=c.toFixed(2);
-  document.getElementById('s-ii').value=p.ii;document.getElementById('s-ipi').value=p.ipi;
-  document.getElementById('s-pis').value=p.pis;document.getElementById('s-cof').value=p.cof;document.getElementById('s-icm').value=p.icms;
+  document.getElementById('s-fob').value=p.fob;document.getElementById('s-cam').value=c.toFixed(4);
+  document.getElementById('s-ii').value=p.dazio||0;
+  document.getElementById('s-ipi').value=p.iva||22;
+  document.getElementById('s-pis').value=p.dpd||0.8;
+  document.getElementById('s-cof').value=p.sped||0.5;
+  document.getElementById('s-icm').value=0;
 }
 
 function gv(id){return parseFloat(document.getElementById(id).value)||0}
 function calcSim(){
   const qtd=gv('s-qtd'),fob=gv('s-fob'),frt=gv('s-frt'),seg=gv('s-seg'),c=gv('s-cam');
-  const ii=gv('s-ii')/100,ipi=gv('s-ipi')/100,pis=gv('s-pis')/100,cof=gv('s-cof')/100,icm=gv('s-icm')/100;
+  // EU/Italy calculation: base = CIF (not FOB like Brazil)
+  // dazio = CIF * aliquota
+  // IVA = (CIF + dazio + DPD) * 22%
+  const dazio=gv('s-ii')/100;   // Dazio MFN
+  const iva=gv('s-ipi')/100;    // IVA 22%
+  const dpd=gv('s-pis')/100;    // DPD customs fees ~0.8%
+  const sped=gv('s-cof')/100;   // Spese bancarie ~0.5%
   const afr=gv('s-afr')/100,des=gv('s-des'),dsp=gv('s-dsp'),fri=gv('s-fri'),mar=gv('s-mar')/100;
-  const tipo=document.getElementById('s-ict').value;
   const fT=fob*qtd,cifU=fT+frt+seg,cifB=cifU*c;
-  const afrB=frt*c*afr,iiB=cifB*ii,ipiB=(cifB+iiB)*ipi,pisB=cifB*pis,cofB=cifB*cof;
-  const base=cifB+iiB+ipiB+pisB+cofB;
-  const icmB=tipo==='dentro'?base*icm/(1-icm):base*icm;
-  const tot=cifB+afrB+iiB+ipiB+pisB+cofB+icmB+des+dsp+fri;
+  // EU calculation method
+  const dazioB=cifB*dazio;           // Dazio sobre CIF
+  const dpdB=cifB*dpd;               // DPD sobre CIF
+  const ivaBase=cifB+dazioB+dpdB;   // Base IVA = CIF + dazio + DPD
+  const ivaB=ivaBase*iva;            // IVA sobre base
+  const spedB=cifB*sped;             // Spese bancarie
+  // Reuse variable names for display compatibility
+  const afrB=dazioB, iiB=ivaB, ipiB=dpdB, pisB=spedB, cofB=0, icmB=0;
+  const tot=cifB+dazioB+ivaB+dpdB+spedB+des+dsp+fri;
   const uni=tot/qtd,preco=uni/(1-mar);
   document.getElementById('sim-tot').textContent=fB(tot);
   document.getElementById('sim-uni').textContent='por unidade: '+fB(uni);
   document.getElementById('sb-min').textContent=fB(uni*0.92);document.getElementById('sb-avg').textContent=fB(uni);document.getElementById('sb-con').textContent=fB(uni*1.15);
   document.getElementById('sim-pc').textContent=fB(preco)+'/un';document.getElementById('sim-mg').textContent=(mar*100).toFixed(1)+'%';
-  const lines=[['FOB total (USD)',fU(fT),''],['CIF (USD)',fU(cifU),''],['CIF (BRL)',fB(cifB),'câmbio '+c.toFixed(2)],['Taxa portuária',fB(afrB),gv('s-afr')+'%'],['II',fB(iiB),gv('s-ii')+'%'],['IPI',fB(ipiB),gv('s-ipi')+'%'],['PIS',fB(pisB),gv('s-pis')+'%'],['COFINS',fB(cofB),gv('s-cof')+'%'],['ICMS',fB(icmB),gv('s-icm')+'%'],['Desp. portuárias',fB(des),''],['Despachante aduaneiro',fB(dsp),''],['Frete interno',fB(fri),'']];
+  const lines=[['FOB total (USD)',fU(fT),''],['CIF (USD)',fU(cifU),''],['CIF (BRL)',fB(cifB),'câmbio '+c.toFixed(2)],['Taxa portuária',fB(afrB),gv('s-afr')+'%'],['Dazio MFN',fB(iiB),gv('s-ii')+'%'],['IVA (import)',fB(ipiB),gv('s-ipi')+'%'],['Dir. aduaneiros',fB(pisB),gv('s-pis')+'%'],['Despesas bancárias',fB(cofB),gv('s-cof')+'%'],['IVA import',fB(icmB),gv('s-icm')+'%'],['Desp. portuárias',fB(des),''],['Despachante aduaneiro',fB(dsp),''],['Frete interno',fB(fri),'']];
   document.getElementById('sim-bk').innerHTML=lines.map(([l,v,n])=>`<div class="sl"><span style="color:#6b7280">${l}</span><span>${v}<span style="font-size:10px;color:#9ca3af;margin-left:5px">${n}</span></span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;font-weight:700;color:#0F4C81"><span>Total</span><span>${fB(tot)}</span></div><div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;font-weight:600;color:#E8621A"><span>Por unidade</span><span>${fB(uni)}</span></div>`;
   rPie([cifB,afrB,iiB,ipiB,pisB,cofB,icmB,des+dsp+fri]);
 }
