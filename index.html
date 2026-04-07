@@ -284,63 +284,131 @@ tr:hover td{background:var(--surf2)}
 
 <div class="page" id="page-simulador">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-    <div><div style="font-size:17px;font-weight:600;margin-bottom:2px">Simulador de custo nacionalizado</div><div style="font-size:11px;color:var(--t3)">Calcule o custo real com todos os tributos</div></div>
-    <button class="abtn" onclick="calcSim()">Calcular</button>
+    <div>
+      <div style="font-size:17px;font-weight:600;margin-bottom:2px">Simulatore costo totale sdoganato — China → Italia/UE</div>
+      <div style="font-size:11px;color:var(--t3)">Tutti i costi reali: spedizione · dazio · IVA · spedizioniere · porto · trasporto</div>
+    </div>
+    <button class="abtn" onclick="calcSim()">Calcolare</button>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 350px;gap:14px;align-items:start">
-    <div style="display:flex;flex-direction:column;gap:12px">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+    <div style="display:flex;flex-direction:column;gap:10px">
       <div class="card">
-        <div class="stitle" style="margin-bottom:8px">Produto e operação</div>
-        <div class="mg2">
-          <div><label class="flbl2">Produto</label><input id="s-prod" value="Scolapiatti in acciaio inox"/></div>
-          <div><label class="flbl2">NC</label><input id="s-ncm" value="7323.93.00" style="font-family:monospace;font-size:11px"/></div>
-          <div><label class="flbl2">Quantidade (un)</label><input id="s-qtd" type="number" value="1000" min="1"/></div>
-          <div><label class="flbl2">Unit. FOB (USD)</label><input id="s-fob" type="number" value="2.85" step="0.01"/></div>
-          <div><label class="flbl2">Frete total (USD)</label><input id="s-frt" type="number" value="950" step="10"/></div>
-          <div><label class="flbl2">Seguro (USD)</label><input id="s-seg" type="number" value="45"/></div>
-          <div><label class="flbl2">Câmbio</label><input id="s-cam" type="number" value="0.92" step="0.01"/></div>
-          <div><label class="flbl2">AFRMM (%)</label><input id="s-afr" type="number" value="8" step="0.5"/></div>
+        <div class="stitle" style="margin-bottom:8px">📦 Prodotto e operazione</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div><label class="flbl2">Prodotto</label><input id="s-prod" value="Scolapiatti in acciaio inox"/></div>
+          <div><label class="flbl2">Codice NC (TARIC)</label><input id="s-ncm" value="7323.93.00" style="font-family:monospace;font-size:11px"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><label class="flbl2">Quantità (pz)</label><input id="s-qtd" type="number" value="1000" min="1"/></div>
+            <div><label class="flbl2">Peso/unità (kg)</label><input id="s-peso" type="number" value="0.80" step="0.01"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><label class="flbl2">FOB/unità (USD)</label><input id="s-fob" type="number" value="2.85" step="0.01"/></div>
+            <div><label class="flbl2">Cambio USD/EUR</label><input id="s-cam" type="number" value="0.92" step="0.01"/></div>
+          </div>
+          <div><label class="flbl2">Modalità trasporto</label>
+            <select id="s-modal" onchange="onModalChange()">
+              <option value="mare_lcl">Marittimo LCL</option>
+              <option value="mare_fcl20" selected>Marittimo FCL 20ft</option>
+              <option value="mare_fcl40">Marittimo FCL 40ft</option>
+              <option value="aereo">Aereo cargoex</option>
+              <option value="corriere">Corriere/Espresso</option>
+            </select>
+          </div>
+          <div><label class="flbl2">Porto di entrata</label>
+            <select id="s-uf" onchange="onUFChange()">
+              <option value="GE">Genova</option>
+              <option value="VE">Venezia</option>
+              <option value="TS">Trieste</option>
+              <option value="NA">Napoli</option>
+              <option value="MI">Milano (aereo)</option>
+              <option value="RM">Roma (aereo)</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="card">
-        <div class="stitle" style="margin-bottom:8px">Alíquotas e tarifas</div>
-        <div class="mg2">
-          <div><label class="flbl2">II (%)</label><input id="s-ii" type="number" value="0" step="0.5"/></div>
-          <div><label class="flbl2">IVA — base: CIF+dazio (%)</label><input id="s-ipi" type="number" value="22" step="0.5"/></div>
-          <div><label class="flbl2">DPD — despesas aduaneiras (%)</label><input id="s-pis" type="number" value="0.8" step="0.1"/></div>
-          <div><label class="flbl2">Spese bancarie (%)</label><input id="s-cof" type="number" value="0.5" step="0.1"/></div>
-          <div><label class="flbl2">Alíquota IVA adicional (%)</label><input id="s-icm" type="number" value="0" step="0.5"/></div>
-          <div><label class="flbl2">Método de cálculo</label><select id="s-ict"><option value="dentro" selected>Por dentro</option><option value="fora">Exclusivo</option></select></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="stitle" style="margin-bottom:8px">Despesas locais (EUR)</div>
-        <div class="mg2">
-          <div><label class="flbl2">Despesas portuárias</label><input id="s-des" type="number" value="680" step="100"/></div>
-          <div><label class="flbl2">Despachante aduaneiro</label><input id="s-dsp" type="number" value="420" step="100"/></div>
-          <div><label class="flbl2">Frete interno</label><input id="s-fri" type="number" value="320" step="100"/></div>
-          <div><label class="flbl2">Margem desejada (%)</label><input id="s-mar" type="number" value="40" step="1"/></div>
+        <div class="stitle" style="margin-bottom:8px">🚢 Spedizione internazionale</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div><label class="flbl2">Nolo marittimo/aereo (USD)</label><input id="s-frt" type="number" value="1400" step="10"/></div>
+          <div><label class="flbl2">Assicurazione (% del CIF)</label><input id="s-seg-pct" type="number" value="0.40" step="0.05"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">Assicurazione cargo internazionale standard</div>
+          </div>
+          <div><label class="flbl2">DPD — Diritti Procedure Doganali (%)</label><input id="s-iof" type="number" value="0.80" step="0.1"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">~0,8% del CIF — tasse procedure doganali UE</div>
+          </div>
         </div>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="card">
+        <div class="stitle" style="margin-bottom:8px">🏛️ Dazio e IVA (base = CIF)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div><label class="flbl2">Dazio MFN — UE (%)</label><input id="s-ii" type="number" value="0" step="0.5"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">Tarifa aduaneira da UE. Consultar TARIC.</div>
+          </div>
+          <div><label class="flbl2">IVA importazione (%)</label><input id="s-ipi" type="number" value="22" step="1"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">22% standard · 10% ridotto · 4% minimo</div>
+          </div>
+          <div style="background:#eff6ff;border:0.5px solid #93c5fd;border-radius:6px;padding:8px;font-size:10px;color:#1e40af;line-height:1.5">
+            <strong>Base IVA = CIF + Dazio + DPD</strong><br>
+            IVA calcolato sull'intera base imponibile<br>
+            (non solo sul valore della merce)
+          </div>
+          <div><label class="flbl2">Spese bancarie (%)</label><input id="s-pis" type="number" value="0.50" step="0.1"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">Commissioni cambio e bonifici</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stitle" style="margin-bottom:8px">🏭 Costi portuali e doganali (EUR)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div><label class="flbl2">THC + Maneggamento porto</label><input id="s-thc" type="number" value="450" step="50"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">Genova/Venezia: €300–600 per contenitore</div>
+          </div>
+          <div><label class="flbl2">Magazzinaggio doganale</label><input id="s-arm" type="number" value="200" step="50"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">Dopo free time. €50–150/giorno</div>
+          </div>
+          <div><label class="flbl2">Spedizioniere doganale</label><input id="s-dsp" type="number" value="350" step="50"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">Doganalista: €200–500 per dichiarazione</div>
+          </div>
+          <div><label class="flbl2">BL release + documentazione</label><input id="s-bl" type="number" value="120" step="20"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">€80–200 — agent fees</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="card">
+        <div class="stitle" style="margin-bottom:8px">🚚 Logistica nazionale (EUR)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div><label class="flbl2">Trasporto interno (porto → azienda)</label><input id="s-fri" type="number" value="500" step="50"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">Genova→Milano: €300–600 · altri: fino €800</div>
+          </div>
+          <div><label class="flbl2">Assicurazione nazionale (EUR)</label><input id="s-segn" type="number" value="100" step="20"/></div>
+          <div><label class="flbl2">Altri costi (EUR)</label><input id="s-out" type="number" value="200" step="50"/>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">Certificazioni CE, ispezioni, altri</div>
+          </div>
+          <div><label class="flbl2">Margine desiderato (%)</label><input id="s-mar" type="number" value="35" step="1"/></div>
+        </div>
+      </div>
       <div class="card" style="background:var(--surf2)">
-        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">Custo total nacionalizado</div>
-        <div style="font-size:24px;font-weight:700;color:var(--brand);margin:6px 0 2px;line-height:1" id="sim-tot">R$ —</div>
-        <div style="font-size:11px;color:var(--t3)" id="sim-uni">por unidade: —</div>
+        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;font-weight:600">Costo totale sdoganato</div>
+        <div style="font-size:26px;font-weight:700;color:var(--brand);margin:6px 0 2px;line-height:1" id="sim-tot">€ —</div>
+        <div style="font-size:11px;color:var(--t3)" id="sim-uni">per unità: —</div>
         <div class="dv"></div>
         <div class="mg3b" style="margin-bottom:10px">
-          <div class="band bmin"><div class="blbl">Mínima</div><div class="bv" id="sb-min">—</div></div>
-          <div class="band bavg"><div class="blbl">Média</div><div class="bv" id="sb-avg">—</div></div>
+          <div class="band bmin"><div class="blbl">Min</div><div class="bv" id="sb-min">—</div></div>
+          <div class="band bavg"><div class="blbl">Media</div><div class="bv" id="sb-avg">—</div></div>
           <div class="band bcons"><div class="blbl">Cons.</div><div class="bv" id="sb-con">—</div></div>
         </div>
         <div id="sim-bk"></div>
         <div class="dv"></div>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Preço sugerido</span><span style="font-weight:600;color:var(--acc)" id="sim-pc">—</span></div>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Margem final</span><span style="font-weight:600;color:#16a34a" id="sim-mg">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Prezzo consigliato</span><span style="font-weight:600;color:var(--acc)" id="sim-pc">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Margine</span><span style="font-weight:600;color:#16a34a" id="sim-mg">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px"><span style="color:var(--t2)">Breakeven</span><span style="font-weight:600" id="sim-be">—</span></div>
       </div>
       <div class="card">
-        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Composição do custo</div>
+        <div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:6px">Composizione del costo</div>
         <div style="position:relative;height:170px"><canvas id="ch-pie"></canvas></div>
         <div id="pie-leg" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px"></div>
       </div>
@@ -559,7 +627,12 @@ async function onInputComAPI(v) {
   if (v.length < 2) { box.style.display = 'none'; return; }
   const q = v.toLowerCase();
 
-  const local = DB.filter(p => p.ncm.includes(v) || p.nome.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+  const vClean = v.replace(/\D/g,'');
+  const local = DB.filter(p => {
+    const ncmClean = p.ncm.replace(/\D/g,'');
+    return p.ncm.includes(v) || ncmClean.includes(vClean) || 
+           p.nome.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
+  });
   if (local.length) {
     box.innerHTML = local.slice(0,5).map(p =>
       `<div class="si" onclick="sel('${p.ncm}')">
@@ -571,7 +644,28 @@ async function onInputComAPI(v) {
     return;
   }
 
-  if (/^[\d.]+$/.test(v) && v.length >= 4) {
+  const tipoCod = detectarTipoCodigo(v);
+  if (tipoCod === 'HS6') {
+    // Código HS universal de 6 dígitos — busca com conversão automática
+    box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Identificando HS ' + v + ' para ITA...</div>';
+    box.style.display = '';
+    buscarPorHSCode(v, 'ITA').then(dados => {
+      if (dados) {
+        const eqs = dados.equivalencias || {};
+        const equiv = Object.entries(eqs).map(([p,c]) => '<span style="font-size:9px;background:#f3f4f6;padding:1px 4px;border-radius:3px;margin-left:3px">'+p+': '+c+'</span>').join('');
+        box.innerHTML = '<div class="si" onclick="loadFromHSCode(\''+v+'\', \'ITA\', \''+encodeURIComponent(dados.nomeComercial||dados.descricao||v)+'\')">'+
+          '<span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px">HS '+v+'</span>'+
+          '<div style="flex:1"><div>'+(dados.nomeComercial||dados.descricao||v).slice(0,45)+'</div>'+
+          '<div style="font-size:9px;color:#9ca3af;margin-top:2px">'+dados.codigoLocal+' ('+dados.sistema+')'+equiv+'</div></div>'+
+          '<span style="font-size:9px;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">HS Global</span>'+
+          '</div>';
+      } else {
+        box.style.display = 'none';
+      }
+    });
+    return;
+  }
+  if (tipoCod === 'LOCAL' || tipoCod === 'PARTIAL') {
     box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Identificando produto...</div>';
     box.style.display = '';
     setTimeout(async () => {
@@ -612,10 +706,12 @@ async function doSearchComAPI() {
   if (!v) return;
   document.getElementById('sugg').style.display = 'none';
 
-  const local = DB.find(x => x.ncm === v || x.nome.toLowerCase().includes(v.toLowerCase()) || x.desc.toLowerCase().includes(v.toLowerCase()));
+  const vClean2 = v.replace(/\D/g,'');
+  const local = DB.find(x => x.ncm === v || x.ncm.replace(/\D/g,'') === vClean2 || 
+    x.nome.toLowerCase().includes(v.toLowerCase()) || x.desc.toLowerCase().includes(v.toLowerCase()));
   if (local) { load(local); return; }
 
-  if (/^[\d.]+$/.test(v) && v.length >= 4) {
+  if (/^[\d. ]+$/.test(v.trim()) && v.replace(/\D/g,'').length >= 4) {
     await loadFromAPI(v, null);
     return;
   }
@@ -639,6 +735,21 @@ async function doSearchComAPI() {
 }
 
 async function loadFromAPI(hts, nomeOverride) {
+  // Normalizar código — formatar com pontos se não tiver
+  let rawCode = (hts || '').trim();
+  const digits = rawCode.replace(/\D/g,'');
+  if (!rawCode.includes('.') && digits.length >= 8) {
+    rawCode = digits.slice(0,4)+'.'+digits.slice(4,6)+'.'+digits.slice(6);
+  }
+  hts = rawCode;
+
+  // Normalizar código — adicionar pontos se não tiver
+  let htsFmt = hts.trim().replace(/\s/g,'');
+  if (!htsFmt.includes('.') && htsFmt.replace(/\D/g,'').length >= 8) {
+    const d = htsFmt.replace(/\D/g,'');
+    htsFmt = d.slice(0,4)+'.'+d.slice(4,6)+'.'+d.slice(6);
+  }
+  hts = htsFmt;
   document.getElementById('sugg').style.display = 'none';
   document.getElementById('qi').value = nomeOverride || hts;
 
@@ -700,7 +811,156 @@ async function loadFromAPI(hts, nomeOverride) {
   load(produtoAPI);
 }
 
-function initApp(){ rFeat(C()); calcSim(); fetchPTAX(); }
+
+// ─── HS CODE UNIVERSAL LOOKUP ──────────────────────────────────────────────
+function extrairHS6(codigo) {
+  return (codigo || '').replace(/\D/g, '').slice(0, 6);
+}
+
+function formatarCodigoPais(hs6, pais) {
+  if (pais === 'BR') {
+    const d = hs6.padEnd(8, '0');
+    return d.slice(0,4)+'.'+d.slice(4,6)+'.'+d.slice(6,8);
+  } else if (pais === 'USA') {
+    const d = hs6.padEnd(10, '0');
+    return d.slice(0,4)+'.'+d.slice(4,6)+'.'+d.slice(6,8)+'.'+d.slice(8,10);
+  } else if (pais === 'ITA') {
+    return hs6.padEnd(8, '0');
+  }
+  return hs6;
+}
+
+function detectarTipoCodigo(v) {
+  const digits = v.replace(/\D/g, '');
+  const hasDots = v.includes('.');
+  if (digits.length === 6 && !hasDots) return 'HS6';
+  if (digits.length >= 8) return 'LOCAL';
+  if (digits.length >= 4 && /^[\d.]+$/.test(v.trim())) return 'PARTIAL';
+  return 'NOME';
+}
+
+async function buscarPorHSCode(hs6, appPais) {
+  const cacheKey = 'HS_'+hs6+'_'+appPais;
+  if (!window._hsCache) window._hsCache = {};
+  if (window._hsCache[cacheKey]) return window._hsCache[cacheKey];
+
+  const paisLabel = {BR:'Brasil',USA:'EUA',ITA:'Italia/UE'}[appPais];
+  const codigoLocal = formatarCodigoPais(hs6, appPais);
+  const sistemaLocal = {BR:'NCM',USA:'HTS',ITA:'NC/TARIC'}[appPais];
+
+  showApiStatus('<span class="spin"></span> Identificando HS '+hs6+' para '+appPais+'...', 'loading');
+
+  try {
+    const prompt = 'Codigo HS internacional de 6 digitos: '+hs6+'\nPais destino: '+paisLabel+'\nSistema local: '+sistemaLocal+'\n\nResponda APENAS com JSON:\n{"hs6":"'+hs6+'","codigoLocal":"codigo '+sistemaLocal+' completo com pontos","sistema":"'+sistemaLocal+'","descricao":"descricao oficial produto em portugues","nomeComercial":"nome comercial curto","fobMedioUn":0.00,"fobMedioKg":0.00,"volumeAnual":"estimativa","confianca":72,"impostos":{"ii":0,"ipi":0,"pis":2.1,"cofins":9.65,"icms":18,"sec301":0,"ieepa":10,"dazio":0,"iva":22},"alertas":["alertas regulatorios"],"equivalencias":{"BR":"NCM equivalente","USA":"HTS equivalente","ITA":"NC equivalente"},"fonte":"HS System / IA"}';
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        messages: [{role:'user', content: prompt}]
+      })
+    });
+
+    if (!response.ok) throw new Error('API '+response.status);
+    const data = await response.json();
+    const text = data.content.map(i => i.text||'').join('');
+    const json = JSON.parse(text.replace(/```json|```/g,'').trim());
+
+    window._hsCache[cacheKey] = json;
+    const nome = (json.nomeComercial || json.descricao || '').slice(0,45);
+    showApiStatus('checkmark HS '+hs6+' = '+json.codigoLocal+' — '+nome, 'ok');
+    return json;
+
+  } catch(e) {
+    showApiStatus('HS lookup indisponivel — tente codigo local direto', 'warn');
+    return null;
+  }
+}
+
+
+async function loadFromHSCode(hs6, appPais, nomeEnc) {
+  document.getElementById('sugg').style.display = 'none';
+  const nome = decodeURIComponent(nomeEnc || hs6);
+  document.getElementById('qi').value = 'HS ' + hs6 + ' — ' + nome;
+
+  const dados = await buscarPorHSCode(hs6, appPais);
+  if (!dados) {
+    document.getElementById('dash-alert').innerHTML = '<strong>HS ' + hs6 + '</strong> — não encontrado.';
+    return;
+  }
+
+  // Usa o código local identificado
+  const codigoLocal = dados.codigoLocal;
+  const local = DB.find(x => x.ncm === codigoLocal || x.ncm.replace(/\D/g,'') === hs6.padEnd(8,'0'));
+
+  if (local) { load(local); return; }
+
+  const c = C();
+  const fob = parseFloat(dados.fobMedioUn) || parseFloat(dados.fobMedioKg) || 1;
+  const cif = parseFloat((fob * 1.12).toFixed(2));
+
+  const produtoHS = {
+    ncm: codigoLocal,
+    nome: dados.nomeComercial || dados.descricao || nome,
+    desc: dados.descricao + ' | HS ' + hs6 + ' | Equivalências: ' +
+      JSON.stringify(dados.equivalencias || {}),
+    fob, cif,
+    pkg: parseFloat(dados.fobMedioKg) || fob,
+    vol: dados.volumeAnual || '—',
+    trend: 0,
+    score: parseInt(dados.confianca) || 65,
+    ii:    dados.impostos?.ii    || 0,
+    ipi:   dados.impostos?.ipi   || 0,
+    pis:   dados.impostos?.pis   || 2.1,
+    cof:   dados.impostos?.cofins|| 9.65,
+    icms:  dados.impostos?.icms  || 18,
+    sec301:dados.impostos?.sec301|| 0,
+    ieepa: dados.impostos?.ieepa || 10,
+    dazio: dados.impostos?.dazio || 0,
+    iva:   dados.impostos?.iva   || 22,
+    dpd:   0.8, sped: 0.5,
+    mpf: 0.3464, hmf: 0.125,
+    ops: [{m:'Atual',fob,cif,qtd:1000,kg:1000,uf:appPais==='USA'?'CA':'SP',mod:appPais==='USA'?'Ocean':'Marítimo',v:null}],
+    adm: {
+      lic: false, an: [],
+      al: dados.alertas || [],
+      desc: 'HS ' + hs6 + ' → ' + dados.sistema + ': ' + codigoLocal + '. Fonte: ' + dados.fonte +
+        '. Equivalências: BR=' + (dados.equivalencias?.BR||'—') +
+        ' USA=' + (dados.equivalencias?.USA||'—') +
+        ' ITA=' + (dados.equivalencias?.ITA||'—')
+    },
+    _hs6: hs6,
+    _equivalencias: dados.equivalencias,
+    _fonte: 'hs'
+  };
+
+  // Mostrar badge com equivalências
+  setTimeout(() => {
+    const badge = document.getElementById('fonte-badge');
+    if (badge) { badge.textContent = 'HS ' + hs6; badge.className = 'bdg b-real'; }
+
+    // Mostrar equivalências no alerta
+    const eq = dados.equivalencias || {};
+    const eqHtml = Object.entries(eq).map(([p,cod]) =>
+      '<span style="font-size:10px;background:#f3f4f6;border:0.5px solid #e5e7eb;padding:2px 7px;border-radius:5px;margin-right:5px"><strong>'+p+':</strong> '+cod+'</span>'
+    ).join('');
+    document.getElementById('dash-alert').innerHTML =
+      '<strong>HS ' + hs6 + '</strong> identificado. Equivalências: ' + eqHtml;
+  }, 100);
+
+  load(produtoHS);
+}
+
+function initApp(){
+  // Garantir câmbio EUR fallback
+  const camEl = document.getElementById('cambio');
+  if (!camEl.value || camEl.value === '5.15' || camEl.value === '0') camEl.value = '0.92';
+  const sCam = document.getElementById('s-cam');
+  if (sCam && (!sCam.value || sCam.value === '5.15' || sCam.value === '0')) sCam.value = '0.92';
+  rFeat(C()); calcSim(); fetchPTAX();
+}
 
 async function fetchPTAX(){
   const barItaEl = document.getElementById('ptax-bar');
@@ -834,34 +1094,113 @@ function preSim(p,c){
 
 function gv(id){return parseFloat(document.getElementById(id).value)||0}
 function calcSim(){
-  const qtd=gv('s-qtd'),fob=gv('s-fob'),frt=gv('s-frt'),seg=gv('s-seg'),c=gv('s-cam');
-  // EU/Italy calculation: base = CIF (not FOB like Brazil)
-  // dazio = CIF * aliquota
-  // IVA = (CIF + dazio + DPD) * 22%
-  const dazio=gv('s-ii')/100;   // Dazio MFN
-  const iva=gv('s-ipi')/100;    // IVA 22%
-  const dpd=gv('s-pis')/100;    // DPD customs fees ~0.8%
-  const sped=gv('s-cof')/100;   // Spese bancarie ~0.5%
-  const afr=gv('s-afr')/100,des=gv('s-des'),dsp=gv('s-dsp'),fri=gv('s-fri'),mar=gv('s-mar')/100;
-  const fT=fob*qtd,cifU=fT+frt+seg,cifB=cifU*c;
-  // EU calculation method
-  const dazioB=cifB*dazio;           // Dazio sobre CIF
-  const dpdB=cifB*dpd;               // DPD sobre CIF
-  const ivaBase=cifB+dazioB+dpdB;   // Base IVA = CIF + dazio + DPD
-  const ivaB=ivaBase*iva;            // IVA sobre base
-  const spedB=cifB*sped;             // Spese bancarie
-  // Reuse variable names for display compatibility
-  const afrB=dazioB, iiB=ivaB, ipiB=dpdB, pisB=spedB, cofB=0, icmB=0;
-  const tot=cifB+dazioB+ivaB+dpdB+spedB+des+dsp+fri;
-  const uni=tot/qtd,preco=uni/(1-mar);
-  document.getElementById('sim-tot').textContent=fB(tot);
-  document.getElementById('sim-uni').textContent='por unidade: '+fB(uni);
-  document.getElementById('sb-min').textContent=fB(uni*0.92);document.getElementById('sb-avg').textContent=fB(uni);document.getElementById('sb-con').textContent=fB(uni*1.15);
-  document.getElementById('sim-pc').textContent=fB(preco)+'/un';document.getElementById('sim-mg').textContent=(mar*100).toFixed(1)+'%';
-  const lines=[['FOB total (USD)',fU(fT),''],['CIF (USD)',fU(cifU),''],['CIF (BRL)',fB(cifB),'câmbio '+c.toFixed(2)],['Taxa portuária',fB(afrB),gv('s-afr')+'%'],['Dazio MFN',fB(iiB),gv('s-ii')+'%'],['IVA (import)',fB(ipiB),gv('s-ipi')+'%'],['Dir. aduaneiros',fB(pisB),gv('s-pis')+'%'],['Despesas bancárias',fB(cofB),gv('s-cof')+'%'],['IVA import',fB(icmB),gv('s-icm')+'%'],['Desp. portuárias',fB(des),''],['Despachante aduaneiro',fB(dsp),''],['Frete interno',fB(fri),'']];
-  document.getElementById('sim-bk').innerHTML=lines.map(([l,v,n])=>`<div class="sl"><span style="color:#6b7280">${l}</span><span>${v}<span style="font-size:10px;color:#9ca3af;margin-left:5px">${n}</span></span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;font-weight:700;color:#0F4C81"><span>Total</span><span>${fB(tot)}</span></div><div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;font-weight:600;color:#E8621A"><span>Por unidade</span><span>${fB(uni)}</span></div>`;
-  rPie([cifB,afrB,iiB,ipiB,pisB,cofB,icmB,des+dsp+fri]);
+  const qtd = gv('s-qtd');
+  const fob = gv('s-fob');
+  const c = gv('s-cam') || 0.92; // USD to EUR
+  const modal = document.getElementById('s-modal')?.value || 'mare_fcl20';
+  const isMar = modal.startsWith('mare');
+
+  const frtUSD = gv('s-frt');
+  const segPct = gv('s-seg-pct') / 100;
+  const dpdPct = gv('s-iof') / 100; // DPD
+  const bancPct = gv('s-pis') / 100; // spese bancarie
+  const fobTotal = fob * qtd;
+  const segUSD = (fobTotal + frtUSD) * segPct;
+  const cifUSD = fobTotal + frtUSD + segUSD;
+  const cifEUR = cifUSD * c;
+
+  // Dazio e IVA (base = CIF)
+  const dazio = gv('s-ii') / 100;
+  const iva = gv('s-ipi') / 100;
+  const dazioEUR = cifEUR * dazio;
+  const dpdEUR = cifEUR * dpdPct;
+  const ivaBase = cifEUR + dazioEUR + dpdEUR; // base IVA = CIF + dazio + DPD
+  const ivaEUR = ivaBase * iva;
+  const bancEUR = cifEUR * bancPct;
+
+  // Costi portuali (EUR)
+  const thcEUR = gv('s-thc');
+  const armEUR = gv('s-arm');
+  const dspEUR = gv('s-dsp');
+  const blEUR = gv('s-bl');
+
+  // Logistica nazionale (EUR)
+  const friEUR = gv('s-fri');
+  const segnEUR = gv('s-segn');
+  const outEUR = gv('s-out');
+  const mar = gv('s-mar') / 100;
+
+  const tributi = dazioEUR + dpdEUR + ivaEUR;
+  const portiDog = thcEUR + armEUR + dspEUR + blEUR;
+  const logNaz = friEUR + segnEUR + outEUR;
+
+  const tot = cifEUR + tributi + portiDog + logNaz + bancEUR;
+  const uni = tot / qtd;
+  const preco = mar > 0 ? uni / (1 - mar) : uni;
+
+  const fE = v => '€ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  document.getElementById('sim-tot').textContent = fE(tot);
+  document.getElementById('sim-uni').textContent = 'per unità: ' + fE(uni);
+  document.getElementById('sb-min').textContent = fE(uni * 0.92);
+  document.getElementById('sb-avg').textContent = fE(uni);
+  document.getElementById('sb-con').textContent = fE(uni * 1.15);
+  document.getElementById('sim-pc').textContent = fE(preco) + '/pz';
+  document.getElementById('sim-mg').textContent = (mar * 100).toFixed(1) + '%';
+  document.getElementById('sim-be').textContent = Math.ceil((portiDog + logNaz) / Math.max(preco - uni, 0.01)) + ' pz';
+
+  const lines = [
+    ['FOB totale', '$ ' + fobTotal.toFixed(2), qtd + ' pz × $' + fob],
+    ['Nolo internazionale', '$ ' + frtUSD.toFixed(2), modal.replace('_',' ')],
+    ['Assicurazione', '$ ' + segUSD.toFixed(2), gv('s-seg-pct') + '% del CIF'],
+    ['CIF totale (USD)', '$ ' + cifUSD.toFixed(2), ''],
+    ['CIF in EUR', fE(cifEUR), 'cambio ' + c.toFixed(4)],
+    ['── DAZIO E IVA ──', '', ''],
+    ['Dazio MFN UE', fE(dazioEUR), gv('s-ii') + '% × CIF'],
+    ['DPD (procedure doganali)', fE(dpdEUR), gv('s-iof') + '% × CIF'],
+    ['Base IVA (CIF+Dazio+DPD)', fE(ivaBase), ''],
+    ['IVA importazione', fE(ivaEUR), gv('s-ipi') + '% × base imponibile'],
+    ['Spese bancarie', fE(bancEUR), gv('s-pis') + '%'],
+    ['── PORTO E DOGANA ──', '', ''],
+    ['THC + Maneggamento', fE(thcEUR), 'terminal portuale'],
+    ['Magazzinaggio doganale', fE(armEUR), 'periodo stimato'],
+    ['Spedizioniere doganale', fE(dspEUR), 'doganalista'],
+    ['BL release + docs', fE(blEUR), 'agente spedizioni'],
+    ['── LOGISTICA NAZIONALE ──', '', ''],
+    ['Trasporto interno', fE(friEUR), 'porto → azienda'],
+    ['Assicurazione nazionale', fE(segnEUR), ''],
+    ['Altri costi', fE(outEUR), 'certificazioni CE etc'],
+  ];
+
+  document.getElementById('sim-bk').innerHTML = lines.map(([l,v,n]) => {
+    if (l.startsWith('──')) return `<div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;padding:6px 0 2px;border-top:0.5px solid var(--bd);margin-top:4px">${l.replace(/──/g,'').trim()}</div>`;
+    return `<div class="sl"><span style="color:var(--t2)">${l}</span><span style="text-align:right">${v}<span style="font-size:10px;color:var(--t3);margin-left:5px">${n}</span></span></div>`;
+  }).join('') +
+  `<div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px;font-weight:700;color:var(--brand);border-top:1px solid var(--bd);margin-top:4px"><span>COSTO TOTALE SDOGANATO</span><span>${fE(tot)}</span></div>
+   <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;font-weight:600;color:var(--acc)"><span>Per unità</span><span>${fE(uni)}</span></div>`;
+
+  rPie([cifEUR, tributi, portiDog, logNaz, bancEUR], ['CIF (merce+nolo+ass)', 'Dazio+IVA+DPD', 'Porto+Dogana', 'Logistica Naz.', 'Bancarie']);
 }
+
+function onModalChange(){
+  const m = document.getElementById('s-modal')?.value || '';
+  const qtd = gv('s-qtd')||1000, peso = gv('s-peso')||0.5;
+  if(m==='mare_lcl'){document.getElementById('s-frt').value=Math.round(qtd*peso/1000*1.5*50).toString();}
+  else if(m==='mare_fcl20'){document.getElementById('s-frt').value='1400';}
+  else if(m==='mare_fcl40'){document.getElementById('s-frt').value='2200';}
+  else if(m==='aereo'){document.getElementById('s-frt').value=Math.round(qtd*peso*5).toString();}
+  else if(m==='corriere'){document.getElementById('s-frt').value=Math.round(qtd*peso*8).toString();}
+  calcSim();
+}
+
+function onUFChange(){
+  const uf = document.getElementById('s-uf')?.value || 'GE';
+  const fri = {GE:500,VE:550,TS:580,NA:650,MI:400,RM:500};
+  document.getElementById('s-fri').value = fri[uf]||500;
+  calcSim();
+}
+
+
 
 function rPie(vals){
   const labs=['CIF BRL','AFRMM','II','IPI','PIS','COFINS','ICMS','Outros'];
