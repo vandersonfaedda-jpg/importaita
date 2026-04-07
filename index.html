@@ -560,7 +560,7 @@ Responda APENAS com JSON válido:
   "fonte": "UN Comtrade / estimativa IA"
 }`;
 
-    const response = await fetch('/api/search', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ tipo: 'codigo', query: ncm || hts || nc || query || '', pais: 'ITA' }) });
+    const response = await fetch('/api/search', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ tipo: 'codigo', query: hts, pais: 'ITA' }) });
 
     if (!response.ok) throw new Error(`API ${response.status}`);
     const data = await response.json();
