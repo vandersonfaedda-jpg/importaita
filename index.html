@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+<
+function fE(v){return '€ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
@@ -1069,21 +1071,21 @@ function load(p){
   document.getElementById('d-vol').textContent=p.vol;
   document.getElementById('d-sc').textContent=p.score+'/100';
   document.getElementById('d-cf').style.cssText='width:'+p.score+'%;background:'+scC(p.score);
-  document.getElementById('d-nac').textContent=fB(nac(p,c));
+  document.getElementById('d-nac').textContent=fE(nac(p,c));
   document.getElementById('r-nome').textContent=p.nome;
   document.getElementById('r-ncm').textContent=p.ncm;
   document.getElementById('r-per').textContent='Últimos '+document.getElementById('fp').value+' meses';
   const sb=document.getElementById('r-sb');sb.textContent=scL(p.score);sb.className='bdg b-'+scV(p.score);
   document.getElementById('r-fob-u').textContent=fU(p.fob);
-  document.getElementById('r-fob-b').textContent=fB(p.fob*c);
+  document.getElementById('r-fob-b').textContent=fE(p.fob*c);
   document.getElementById('r-fob-bs').textContent='câmbio '+c.toFixed(2)+' ('+PTAX_SRC+')';
   document.getElementById('r-cif').textContent=fU(p.cif);
   document.getElementById('r-pkg').textContent=fU(p.pkg)+'/kg';
   document.getElementById('r-vol').textContent=p.vol;
   document.getElementById('r-tick').textContent=fU(p.fob*(p.ops[0]?.qtd||1000));
-  document.getElementById('b-min').textContent=fB(p.fob*c*0.85);
-  document.getElementById('b-avg').textContent=fB(p.fob*c);
-  document.getElementById('b-cons').textContent=fB(p.fob*c*1.18);
+  document.getElementById('b-min').textContent=fE(p.fob*c*0.85);
+  document.getElementById('b-avg').textContent=fE(p.fob*c);
+  document.getElementById('b-cons').textContent=fE(p.fob*c*1.18);
   const ring=document.getElementById('sring');
   ring.style.strokeDashoffset=(125.6-125.6*p.score/100).toFixed(1);ring.style.stroke=scC(p.score);
   document.getElementById('snum').textContent=p.score;
