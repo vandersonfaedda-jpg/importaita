@@ -67,7 +67,7 @@ Responda APENAS com JSON valido sem texto adicional. Use valores FOB reais de me
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama3-8b-8192',
         max_tokens: 1500,
         temperature: 0.1,
         messages: [
