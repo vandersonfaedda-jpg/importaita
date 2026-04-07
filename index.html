@@ -702,9 +702,15 @@ async function onInputComAPI(v) {
 }
 
 async function doSearchComAPI() {
-  const v = document.getElementById('qi').value.trim();
+  let v = document.getElementById('qi').value.trim();
   if (!v) return;
   document.getElementById('sugg').style.display = 'none';
+  
+  // Extrair código de texto como "Produto NCM 4421.9900"
+  const extracted = extrairCodigoDoTexto(v);
+  if (extracted !== v && extracted.length >= 4) {
+    v = extracted; // usar o código extraído
+  }
 
   const vClean2 = v.replace(/\D/g,'');
   const local = DB.find(x => x.ncm === v || x.ncm.replace(/\D/g,'') === vClean2 || 
@@ -951,6 +957,33 @@ async function loadFromHSCode(hs6, appPais, nomeEnc) {
   }, 100);
 
   load(produtoHS);
+}
+
+
+// ─── EXTRAÇÃO DE CÓDIGO DE QUALQUER TEXTO ─────────────────────────────────
+function extrairCodigoDoTexto(v) {
+  // Procura por padrão de código no texto
+  // NCM: 4 dígitos + ponto + 2 + ponto + 2 (com ou sem pontos)
+  const patterns = [
+    /\b(\d{4}\.\d{2}\.\d{2,4})\b/,
+    /\b(\d{4}\.\d{4})\b/,
+    /\b(\d{8,10})\b/,
+    /\b(\d{6})\b/,
+    /\b(\d{4}\.\d{2})\b/,
+    /\b(\d{4})\b/,
+  ];
+  
+  for (const p of patterns) {
+    const m = v.match(p);
+    if (m) return m[1];
+  }
+  
+  // Sem código — é busca por nome
+  // Remove palavras comuns que não são nomes de produto
+  const cleaned = v
+    .replace(/\b(produto|ncm|hts|nc|hs|codigo|código|code|item|ref|referencia)\b/gi, '')
+    .trim();
+  return cleaned || v;
 }
 
 function initApp(){
