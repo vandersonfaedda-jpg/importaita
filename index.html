@@ -627,11 +627,25 @@ async function onInputComAPI(v) {
   if (v.length < 2) { box.style.display = 'none'; return; }
   const q = v.toLowerCase();
 
-  const vClean = v.replace(/\D/g,'');
+  const vClean = v2.replace(/\D/g,'');
   const local = DB.filter(p => {
     const ncmClean = p.ncm.replace(/\D/g,'');
-    return p.ncm.includes(v) || ncmClean.includes(vClean) || 
-           p.nome.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
+    const matchCodigo = vClean.length >= 4 && (p.ncm.includes(v2) || ncmClean.includes(vClean));
+    const matchNome = (() => {
+      // Normalizar acentos para comparação
+      const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const qNorm = norm(q);
+      const nomeNorm = norm(p.nome), descNorm = norm(p.desc);
+      // Busca simples (substring)
+      if (nomeNorm.includes(qNorm) || descNorm.includes(qNorm)) return true;
+      // Busca por palavras individuais (ex: "escorredor inox" encontra "Escorredor de louça inox")
+      const words = qNorm.split(' ').filter(w => w.length > 2);
+      if (words.length > 1) {
+        return words.every(w => nomeNorm.includes(w) || descNorm.includes(w));
+      }
+      return false;
+    })();
+    return matchCodigo || matchNome;
   });
   if (local.length) {
     box.innerHTML = local.slice(0,5).map(p =>
@@ -644,7 +658,7 @@ async function onInputComAPI(v) {
     return;
   }
 
-  const tipoCod = detectarTipoCodigo(v);
+  const tipoCod = detectarTipoCodigo(v2);
   if (tipoCod === 'HS6') {
     // Código HS universal de 6 dígitos — busca com conversão automática
     box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Identificando HS ' + v + ' para ITA...</div>';
@@ -663,6 +677,27 @@ async function onInputComAPI(v) {
         box.style.display = 'none';
       }
     });
+    return;
+  }
+  if (tipoCod === 'NOME') {
+    // Busca por nome via IA — com debounce
+    clearTimeout(window._searchTimeout);
+    window._searchTimeout = setTimeout(async () => {
+      box.innerHTML = '<div class="si" style="color:#9ca3af"><span class="spin"></span> Buscando "' + v2 + '"...</div>';
+      box.style.display = '';
+      const resultados = await buscarNCMPorNome(v2);
+      if (resultados && resultados.length) {
+        box.innerHTML = resultados.map(r =>
+          `<div class="si" onclick="loadFromAPI('${r.ncm}', '${(r.nome||'').replace(/'/g,"\\'")}')">
+            <span style="font-family:monospace;font-size:10px;color:#9ca3af;min-width:70px;flex-shrink:0">${r.ncm}</span>
+            <span>${(r.nome||'').slice(0,55)}</span>
+            <span style="font-size:9px;background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;margin-left:4px">IA</span>
+          </div>`
+        ).join('');
+      } else {
+        box.innerHTML = '<div class="si" style="color:#9ca3af;font-size:11px;padding:8px">Nenhum resultado para "' + v2 + '"</div>';
+      }
+    }, 600);
     return;
   }
   if (tipoCod === 'LOCAL' || tipoCod === 'PARTIAL') {
