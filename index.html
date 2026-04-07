@@ -210,7 +210,7 @@ tr:hover td{background:var(--surf2)}
     <div class="mc"><div class="mlbl">Preço / kg</div><div class="mval" id="d-pkg">—</div><div class="msub">USD/kg</div></div>
     <div class="mc"><div class="mlbl">Volume</div><div class="mval" id="d-vol">—</div><div class="msub">período</div></div>
     <div class="mc"><div class="mlbl">Confiança</div><div class="mval" id="d-sc">—</div><div class="cb"><div class="cf" id="d-cf" style="width:0%"></div></div></div>
-    <div class="mc"><div class="mlbl">Custo nac. est.</div><div class="mval" id="d-nac">—</div><div class="msub">BRL/un</div></div>
+    <div class="mc"><div class="mlbl">Custo nac. est.</div><div class="mval" id="d-nac">—</div><div class="msub">EUR/un</div></div>
   </div>
   <div class="card">
     <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:10px">Produtos em destaque</div>
@@ -713,9 +713,11 @@ async function doSearchComAPI() {
   }
 
   const vClean2 = v.replace(/\D/g,'');
-  const local = DB.find(x => x.ncm === v || x.ncm.replace(/\D/g,'') === vClean2 || 
-    x.nome.toLowerCase().includes(v.toLowerCase()) || x.desc.toLowerCase().includes(v.toLowerCase()));
-  if (local) { load(local); return; }
+  const ehCodigo = /^[\d.]+$/.test(v.trim()) && vClean2.length >= 4;
+  if (ehCodigo) {
+    const local = DB.find(x => x.ncm === v || x.ncm.replace(/\D/g,'') === vClean2);
+    if (local) { load(local); return; }
+  }
 
   if (/^[\d. ]+$/.test(v.trim()) && v.replace(/\D/g,'').length >= 4) {
     await loadFromAPI(v, null);
