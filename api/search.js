@@ -30,15 +30,15 @@ module.exports = async function handler(req, res) {
   if (tipo === 'nome') {
     prompt = `Especialista em comércio exterior China-${paisLabel}. Liste 5 produtos com código ${sistema} para "${query}". Para cada um, informe o preço FOB real de importação da China. Responda APENAS com array JSON:
 [
-  {"ncm":"xxxx.xx.xx","nome":"nome comercial","descricao":"descrição oficial","fobMedioKg":PRECO_REAL},
+  {"ncm":"xxxx.xx.xx","nome":"nome comercial","descricao":"descrição oficial","fobMedioKg":0},
   ...
 ]
 Use preços FOB reais do mercado China-${paisLabel} para cada produto específico.`;
 
   } else if (tipo === 'hs6') {
     prompt = `Código HS6 ${query} para ${paisLabel}. Responda APENAS com JSON:
-{"hs6":"${query}","descricao":"descrição do produto","nomeComercial":"nome curto","codigoLocal":"código ${sistema} completo","sistema":"${sistema}","fobMedioUn":PRECO_REAL,"fobMedioKg":PRECO_KG_REAL,"confianca":80,"impostos":${JSON.stringify(imp)},"equivalencias":{"BR":"NCM","USA":"HTS","ITA":"NC"},"alertas":[],"fonte":"HS/${sistema}"}
-Substitua PRECO_REAL e PRECO_KG_REAL pelo preço FOB real deste produto importado da China.`;
+{"hs6":"${query}","descricao":"descrição do produto","nomeComercial":"nome curto","codigoLocal":"código ${sistema} completo","sistema":"${sistema}","fobMedioUn":0,"fobMedioKg":0,"confianca":80,"impostos":${JSON.stringify(imp)},"equivalencias":{"BR":"NCM","USA":"HTS","ITA":"NC"},"alertas":[],"fonte":"HS/${sistema}"}
+Substitua 0 e 0 pelo preço FOB real deste produto importado da China.`;
 
   } else {
     // codigo ou ncm
@@ -58,12 +58,12 @@ Responda APENAS com JSON (sem markdown):
   "confianca": 75,
   "impostos": ${JSON.stringify(imp)},
   "historico": [
-    {"mes": "Mar/25", "fobKg": PRECO_REAL, "kgTotal": 50000},
-    {"mes": "Fev/25", "fobKg": PRECO_REAL, "kgTotal": 48000},
-    {"mes": "Jan/25", "fobKg": PRECO_REAL, "kgTotal": 45000},
-    {"mes": "Dez/24", "fobKg": PRECO_REAL, "kgTotal": 42000},
-    {"mes": "Nov/24", "fobKg": PRECO_REAL, "kgTotal": 46000},
-    {"mes": "Out/24", "fobKg": PRECO_REAL, "kgTotal": 44000}
+    {"mes": "Mar/25", "fobKg": 0, "kgTotal": 50000},
+    {"mes": "Fev/25", "fobKg": 0, "kgTotal": 48000},
+    {"mes": "Jan/25", "fobKg": 0, "kgTotal": 45000},
+    {"mes": "Dez/24", "fobKg": 0, "kgTotal": 42000},
+    {"mes": "Nov/24", "fobKg": 0, "kgTotal": 46000},
+    {"mes": "Out/24", "fobKg": 0, "kgTotal": 44000}
   ],
   "alertas": ["alertas regulatórios relevantes se houver"],
   "licencaPrevia": false,
@@ -71,7 +71,7 @@ Responda APENAS com JSON (sem markdown):
   "fonte": "estimativa baseada em dados reais de comércio exterior China-${paisLabel}"
 }
 
-IMPORTANTE: Substitua todos os valores PRECO_REAL pelo preço FOB real deste produto específico importado da China para ${paisLabel}. NÃO use valores genéricos como 12.50 ou 2.50. Pesquise o preço real de mercado.`;
+IMPORTANTE: Substitua todos os valores 0 pelo preço FOB real deste produto específico importado da China para ${paisLabel}. NÃO use valores genéricos como 12.50 ou 2.50. Pesquise o preço real de mercado.`;
   }
 
   try {
